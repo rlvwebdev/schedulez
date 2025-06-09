@@ -1,1 +1,46 @@
+{
+  "name": "Home Management System",
+  "short_name": "HMS",
+  "description": "Complete home and schedule management system with TMS development tracking",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#667eea",
+  "theme_color": "#667eea",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["productivity", "lifestyle"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMzIiIGZpbGw9InVybCgjZ3JhZGllbnQwX2xpbmVhcl8xXzEpIi8+CjxwYXRoIGQ9Ik05NiA0OEw2NCA4MEg4MFY5NkgxMTJWODBIMTI4TDk2IDQ4WiIgZmlsbD0id2hpdGUiLz4KPHA+dGggZD0iTTQ4IDEwNEg4MFYxMzZINDhWMTA0WiIgZmlsbD0id2hpdGUiLz4KPHA+dGggZD0iTTExMiAxMDRIMTQ0VjEzNkgxMTJWMTA0WiIgZmlsbD0id2hpdGUiLz4KPHA+dGggZD0iTTQ4IDE0NEg4MFYxNzZINDhWMTQ0WiIgZmlsbD0id2hpdGUiLz4KPHA+dGggZD0iTTExMiAxNDRIMTQ0VjE3NkgxMTJWMTQ0WiIgZmlsbD0id2hpdGUiLz4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZGllbnQwX2xpbmVhcl8xXzEiIHgxPSIwIiB5MT0iMCIgeDI9IjE5MiIgeTI9IjE5MiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjNjY3ZWVhIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzc2NGJhMiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo=",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iODQiIGZpbGw9InVybCgjZ3JhZGllbnQwX2xpbmVhcl8xXzEpIi8+CjxwYXRoIGQ9Ik0yNTYgMTI4TDE3MCAyMTNIMjEzVjI1NkgzMDBWMjEzSDM0MkwyNTYgMTI4WiIgZmlsbD0id2hpdGUiLz4KPHA+dGggZD0iTTEyOCAyNzVIMjEzVjM2MEgxMjhWMjc1WiIgZmlsbD0id2hpdGUiLz4KPHA+dGggZD0iTTMwMCAyNzVIMzg0VjM2MEgzMDBWMjc1WiIgZmlsbD0id2hpdGUiLz4KPHA+dGggZD0iTTEyOCAzODRIMjEzVjQ2OUgxMjhWMzg0WiIgZmlsbD0id2hpdGUiLz4KPHA+dGggZD0iTTMwMCAzODRIMzg0VjQ2OUgzMDBWMzg0WiIgZmlsbD0id2hpdGUiLz4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZGllbnQwX2xpbmVhcl8xXzEiIHgxPSIwIiB5MT0iMCIgeDI9IjUxMiIgeTI9IjUxMiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjNjY3ZWVhIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzc2NGJhMiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo=",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Today's Schedule",
+      "short_name": "Today",
+      "description": "View today's schedule",
+      "url": "/?view=daily",
+      "icons": [{ "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9Ijk2IiBoZWlnaHQ9Ijk2IiByeD0iMTYiIGZpbGw9IiM2NjdlZWEiLz4KPHA+dGggZD0iTTI0IDMySDcyVjY0SDI0VjMyWiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+", "sizes": "96x96" }]
+    },
+    {
+      "name": "Add Event",
+      "short_name": "Add",
+      "description": "Add new scheduled event",
+      "url": "/?action=add",
+      "icons": [{ "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9Ijk2IiBoZWlnaHQ9Ijk2IiByeD0iMTYiIGZpbGw9IiM2NjdlZWEiLz4KPHA+dGggZD0iTTQ4IDI0VjcyTTI0IDQ4SDcyIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4=", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
 

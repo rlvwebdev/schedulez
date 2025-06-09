@@ -1,1 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Home Management System</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Complete home and schedule management system with TMS development tracking">
+    <meta name="theme-color" content="#667eea">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="HMS">
+    <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="msapplication-tap-highlight" content="no">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Icons for different platforms -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzY2N2VlYSIvPgo8cGF0aCBkPSJNMTYgOEwxMSAxM0gxM1YxNkgxOVYxM0gyMUwxNiA4WiIgZmlsbD0id2hpdGUiLz4KPHA+dGggZD0iTTggMTdIMTNWMjJIOFYxN1oiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xOSAxN0gyNFYyMkgxOVYxN1oiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik04IDI0SDEzVjI5SDhWMjRaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMTkgMjRIMjRWMjlIMTlWMjRaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iMzAiIGZpbGw9IiM2NjdlZWEiLz4KPHA+dGggZD0iTTkwIDQ1TDYwIDc1SDc1Vjg5SDEwNVY3NUgxMjBMOTAgNDVaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNDUgOThINzVWMTI4SDQ1Vjk4WiIgZmlsbD0id2hpdGUiLz4KPHA+dGggZD0iTTEwNSA5OEgxMzVWMTI4SDEwNVY5OFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik00NSAxMzVINzVWMTY1SDQ1VjEzNVoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMDUgMTM1SDEzNVYxNjVIMTA1VjEzNVoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>🏠 HMS</h1>
+                <p>Home Management System</p>
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-page="dashboard">
+                            <span class="nav-icon">📊</span>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="daily">
+                            <span class="nav-icon">📅</span>
+                            Daily Schedule
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="weekly">
+                            <span class="nav-icon">📋</span>
+                            Weekly Tasks
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="monthly">
+                            <span class="nav-icon">🗓️</span>
+                            Monthly Tasks
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="manage">
+                            <span class="nav-icon">⚙️</span>
+                            Manage Events
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page active">
+                <div class="page-header">
+                    <h1 class="page-title">Dashboard</h1>
+                    <p class="page-subtitle">Your home management overview</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <span class="stat-number">12h</span>
+                        <div class="stat-label">Weekly TMS Development</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">1h 25m</span>
+                        <div class="stat-label">Morning Routine</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">2</span>
+                        <div class="stat-label">Dogs to Care For</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="total-tasks">0</span>
+                        <div class="stat-label">Total Scheduled Tasks</div>
+                    </div>
+                </div>
+
+                <div class="schedule-container">
+                    <h2 style="margin-bottom: 20px; color: #2c3e50;">Today's Overview</h2>
+                    <div id="today-schedule">
+                        <!-- Today's schedule will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Schedule Page -->
+            <div id="daily" class="page">
+                <div class="page-header">
+                    <h1 class="page-title">Daily Schedule</h1>
+                    <p class="page-subtitle">Your complete daily routine</p>
+                </div>
+
+                <div class="schedule-container">
+                    <div id="daily-schedule">
+                        <!-- Daily schedule content -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Tasks Page -->
+            <div id="weekly" class="page">
+                <div class="page-header">
+                    <h1 class="page-title">Weekly Tasks</h1>
+                    <p class="page-subtitle">Organized by day of the week</p>
+                </div>
+
+                <div class="tasks-grid" id="weekly-tasks">
+                    <!-- Weekly tasks content -->
+                </div>
+            </div>
+
+            <!-- Monthly Tasks Page -->
+            <div id="monthly" class="page">
+                <div class="page-header">
+                    <h1 class="page-title">Monthly Tasks</h1>
+                    <p class="page-subtitle">Long-term maintenance and planning</p>
+                </div>
+
+                <div class="tasks-grid" id="monthly-tasks">
+                    <!-- Monthly tasks content -->
+                </div>
+            </div>
+
+            <!-- Manage Events Page -->
+            <div id="manage" class="page">
+                <div class="page-header">
+                    <h1 class="page-title">Manage Events</h1>
+                    <p class="page-subtitle">Create, edit, and organize your schedule</p>
+                </div>
+
+                <div class="schedule-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 style="color: #2c3e50;">All Events</h2>
+                        <button class="btn btn-primary" onclick="openEventModal()">
+                            <span>+</span> Add New Event
+                        </button>
+                    </div>
+                    <div id="events-list">
+                        <!-- Events list will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Floating Add Button -->
+    <button class="floating-add-btn" onclick="openEventModal()" title="Add New Event">+</button>
+
+    <!-- Event Modal -->
+    <div id="event-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Add New Event</h2>
+                <button class="close-btn" onclick="closeEventModal()">&times;</button>
+            </div>
+            <form id="event-form">
+                <div class="form-group">
+                    <label class="form-label">Event Title</label>
+                    <input type="text" id="event-title" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Time</label>
+                    <input type="time" id="event-time" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select id="event-category" class="form-control form-select" required>
+                        <option value="">Select category</option>
+                        <option value="personal">Personal</option>
+                        <option value="dogs">Dogs</option>
+                        <option value="cleaning">Cleaning</option>
+                        <option value="kitchen">Kitchen</option>
+                        <option value="development">TMS Development</option>
+                        <option value="maintenance">Maintenance</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Schedule Type</label>
+                    <select id="event-schedule" class="form-control form-select" required>
+                        <option value="">Select schedule type</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                    </select>
+                </div>
+                <div class="form-group" id="weekly-day-group" style="display: none;">
+                    <label class="form-label">Day of Week</label>
+                    <select id="event-day" class="form-control form-select">
+                        <option value="">Select day</option>
+                        <option value="monday">Monday</option>
+                        <option value="tuesday">Tuesday</option>
+                        <option value="wednesday">Wednesday</option>
+                        <option value="thursday">Thursday</option>
+                        <option value="friday">Friday</option>
+                        <option value="saturday">Saturday</option>
+                        <option value="sunday">Sunday</option>
+                    </select>
+                </div>
+                <div class="form-group" id="monthly-week-group" style="display: none;">
+                    <label class="form-label">Week of Month</label>
+                    <select id="event-week" class="form-control form-select">
+                        <option value="">Select week</option>
+                        <option value="first">First Week</option>
+                        <option value="second">Second Week</option>
+                        <option value="third">Third Week</option>
+                        <option value="fourth">Fourth Week</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea id="event-description" class="form-control" rows="3"></textarea>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeEventModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
 

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Schedulez Data</title>
+</head>
+<body>
+    <h1>Clear Schedulez LocalStorage</h1>
+    <button onclick="clearData()">Clear All Data and Reload Defaults</button>
+    <div id="result"></div>
+    
+    <script>
+        function clearData() {
+            localStorage.removeItem('homeEvents');
+            localStorage.removeItem('lastDailyReset');
+            document.getElementById('result').innerHTML = '<p style="color: green;">✅ Data cleared! Go back to the main app to see fresh data.</p>';
+        }
+    </script>
+</body>
+</html>

@@ -1,8 +1,11 @@
-const CACHE_NAME = 'hms-v1.0.0';
+const CACHE_NAME = 'hms-v1.1.0';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/manifest.json'
+  '/styles.css',
+  '/script.js',
+  '/manifest.json',
+  '/sw.js'
 ];
 
 // Install service worker

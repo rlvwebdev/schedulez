@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drag Handle Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .test-block {
+            background: #f0f0f0;
+            margin: 10px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .drag-handle {
+            cursor: grab;
+            color: #ff6b6b;
+            margin-right: 8px;
+            font-size: 0.9em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-block;
+            padding: 2px 6px;
+            background: rgba(255, 107, 107, 0.1);
+            border-radius: 4px;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+        .drag-handle:hover {
+            color: #ffffff;
+            background: #ff6b6b;
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <h1>Drag Handle Visibility Test</h1>
+    
+    <div class="test-block">
+        <span class="drag-handle" title="Drag to reorder">🔀 DRAG</span>
+        This is test item 1 with a drag handle
+    </div>
+    
+    <div class="test-block">
+        <span class="drag-handle" title="Drag to reorder">🔀 DRAG</span>
+        This is test item 2 with a drag handle
+    </div>
+    
+    <div class="test-block">
+        <span class="drag-handle" title="Drag to reorder">🔀 DRAG</span>
+        This is test item 3 with a drag handle
+    </div>
+    
+    <p><strong>If you can see red "🔀 DRAG" buttons above, the drag handles are working!</strong></p>
+    
+    <script>
+        console.log('Drag handles found:', document.querySelectorAll('.drag-handle').length);
+        
+        // Make elements draggable for testing
+        document.querySelectorAll('.test-block').forEach(block => {
+            block.draggable = true;
+            block.addEventListener('dragstart', function(e) {
+                console.log('Drag started on:', this.textContent);
+                this.style.opacity = '0.5';
+            });
+            
+            block.addEventListener('dragend', function(e) {
+                console.log('Drag ended on:', this.textContent);
+                this.style.opacity = '1';
+            });
+        });
+    </script>
+</body>
+</html>

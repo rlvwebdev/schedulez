@@ -246,9 +246,8 @@
                         💡 <strong>Drag and Drop:</strong> You can drag tasks by the ⋮⋮ handle to reorder them. Times will automatically adjust!
                     </small>
                 </div>                <div class="schedule-container">
-                    <!-- Search Section -->
-                    <div class="search-filter-section">
-                        <input type="text" id="search-input" class="search-input" 
+                    <!-- Search Section -->                    <div class="search-filter-section">
+                        <input type="text" id="search-input" name="search" class="search-input" 
                                placeholder="Search events by title, description, or category..."
                                onkeyup="searchEvents(this.value)">
                     </div>
@@ -271,10 +270,8 @@
     <button class="floating-add-btn" onclick="openEventModal()" title="Add New Event">+</button>    <!-- Mobile Navigation Toggle -->
     <button class="mobile-nav-toggle" onclick="toggleMobileNav()" title="Toggle Navigation">
         ☰
-    </button>
-
-    <!-- Hidden File Input for Import -->
-    <input type="file" id="import-file" accept=".json" style="display: none;">
+    </button>    <!-- Hidden File Input for Import -->
+    <input type="file" id="import-file" name="import-file" accept=".json" style="display: none;">
 
     <!-- Event Modal -->
     <div id="event-modal" class="modal">
@@ -285,17 +282,16 @@
             </div>
             <form id="event-form">                <div class="form-group">
                     <label class="form-label" for="event-title">Event Title</label>
-                    <input type="text" id="event-title" class="form-control" required 
+                    <input type="text" id="event-title" name="title" class="form-control" required 
                            placeholder="Enter event title" aria-describedby="title-help">
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="event-time">Time</label>
-                    <input type="time" id="event-time" class="form-control" required 
+                    <input type="time" id="event-time" name="time" class="form-control" required 
                            aria-describedby="time-help">
-                </div>
-                <div class="form-group">
+                </div>                <div class="form-group">
                     <label class="form-label" for="event-category">Category</label>
-                    <select id="event-category" class="form-control form-select" required 
+                    <select id="event-category" name="category" class="form-control form-select" required 
                             aria-describedby="category-help">
                         <option value="">Select category</option>
                         <option value="personal">Personal</option>
@@ -308,7 +304,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="event-schedule">Schedule Type</label>
-                    <select id="event-schedule" class="form-control form-select" required 
+                    <select id="event-schedule" name="schedule" class="form-control form-select" required 
                             aria-describedby="schedule-help">
                         <option value="">Select schedule type</option>
                         <option value="daily">Daily</option>
@@ -317,7 +313,7 @@
                     </select>
                 </div>                <div class="form-group" id="weekly-day-group" data-hidden="true">
                     <label class="form-label" for="event-day">Day of Week</label>
-                    <select id="event-day" class="form-control form-select">
+                    <select id="event-day" name="day" class="form-control form-select">
                         <option value="">Select day</option>
                         <option value="monday">Monday</option>
                         <option value="tuesday">Tuesday</option>
@@ -330,7 +326,7 @@
                 </div>
                 <div class="form-group" id="monthly-week-group" data-hidden="true">
                     <label class="form-label" for="event-week">Week of Month</label>
-                    <select id="event-week" class="form-control form-select">
+                    <select id="event-week" name="week" class="form-control form-select">
                         <option value="">Select week</option>
                         <option value="first">First Week</option>
                         <option value="second">Second Week</option>
@@ -340,7 +336,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="event-description">Description</label>
-                    <textarea id="event-description" class="form-control" rows="3" 
+                    <textarea id="event-description" name="description" class="form-control" rows="3" 
                               placeholder="Optional description or notes"></textarea>
                 </div>
                 <div class="form-actions">

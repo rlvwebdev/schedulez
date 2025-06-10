@@ -87,10 +87,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeDataManagement();
     initializeProgressTracking();
     renderAllViews();
-    updateProgressStats();
-      // Initialize PWA
+    updateProgressStats();    // Initialize PWA
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('src/js/sw.js')
+        navigator.serviceWorker.register('./sw.js')
             .then(reg => console.log('✅ SW registered:', reg))
             .catch(err => console.log('❌ SW registration failed:', err));
     }

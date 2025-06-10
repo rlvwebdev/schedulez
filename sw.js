@@ -1,11 +1,12 @@
 const CACHE_NAME = 'schedulez-v1.2.0';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/script.js',
-  '/manifest.json',
-  '/sw.js'
+  './',
+  './index.html',
+  './src/css/styles.css',
+  './src/js/script.js',
+  './manifest.json',
+  './assets/icons/schedulez-logo.svg',
+  './assets/icons/favicon.svg'
 ];
 
 // Install service worker

@@ -260,12 +260,13 @@
     </div>
 
     <!-- Floating Add Button -->
-    <button class="floating-add-btn" onclick="openEventModal()" title="Add New Event">+</button>
-
-    <!-- Mobile Navigation Toggle -->
+    <button class="floating-add-btn" onclick="openEventModal()" title="Add New Event">+</button>    <!-- Mobile Navigation Toggle -->
     <button class="mobile-nav-toggle" onclick="toggleMobileNav()" title="Toggle Navigation">
         ☰
     </button>
+
+    <!-- Hidden File Input for Import -->
+    <input type="file" id="import-file" accept=".json" style="display: none;">
 
     <!-- Event Modal -->
     <div id="event-modal" class="modal">

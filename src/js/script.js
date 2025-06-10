@@ -324,9 +324,7 @@ function resetDailyTasks() {
     saveEvents();
 }
 
-function toggleTaskCompletion(id, event) {
-    event.stopPropagation();
-    
+function toggleTaskCompletion(id) {
     const eventIndex = events.findIndex(e => e.id === id);
     if (eventIndex === -1) return;
     
@@ -493,7 +491,7 @@ function performSearch(query) {
                             <input type="checkbox" 
                                    class="event-checkbox" 
                                    ${isCompleted ? 'checked' : ''} 
-                                   onchange="toggleTaskCompletion(${event.id}, event)"
+                                   onchange="toggleTaskCompletion(${event.id})"
                                    aria-label="Mark task as complete">
                         </div>
                         <div class="event-content">
@@ -529,13 +527,10 @@ function initializeDataManagement() {
         exportBtn.addEventListener('click', exportData);
     }
     
-    // Import data
+    // Import data - directly call the function, no hidden input needed
     const importBtn = document.getElementById('import-data');
-    const importFile = document.getElementById('import-file');
-    
-    if (importBtn && importFile) {
-        importBtn.addEventListener('click', () => importFile.click());
-        importFile.addEventListener('change', importData);
+    if (importBtn) {
+        importBtn.addEventListener('click', importData);
     }
     
     // Reset data
@@ -571,31 +566,40 @@ function exportData() {
     }
 }
 
-function importData(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+function importData() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
     
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const data = JSON.parse(e.target.result);
-            
-            if (data.events && Array.isArray(data.events)) {
-                events = data.events;
-                saveEvents();
-                updateProgressStats();
-                showNotification('Data imported successfully!', 'success');
-            } else {
-                throw new Error('Invalid file format');
+    input.onchange = function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                
+                if (data.events && Array.isArray(data.events)) {
+                    if (confirm('This will replace all your current data. Are you sure?')) {
+                        events = data.events;
+                        saveEvents();
+                        renderAllViews();
+                        updateProgressStats();
+                        showNotification('Data imported successfully!', 'success');
+                    }
+                } else {
+                    throw new Error('Invalid file format');
+                }
+            } catch (error) {
+                console.error('Import failed:', error);
+                showNotification('Failed to import data. Please check the file format.', 'error');
             }
-        } catch (error) {
-            console.error('Import failed:', error);
-            showNotification('Failed to import data. Please check the file format.', 'error');
-        }
+        };
+        reader.readAsText(file);
     };
     
-    reader.readAsText(file);
-    event.target.value = ''; // Reset file input
+    input.click();
 }
 
 function resetData() {
@@ -603,9 +607,14 @@ function resetData() {
         events = [];
         localStorage.removeItem('homeEvents');
         initializeDefaultEvents();
+        renderAllViews();
         updateProgressStats();
         showNotification('Data reset successfully!', 'success');
     }
+}
+
+function resetToDefaults() {
+    resetData();
 }
 
 // Drag and Drop functionality
@@ -763,7 +772,7 @@ function renderAllViews() {
 }
 
 function renderDailySchedule() {
-    const container = document.getElementById('daily-events');
+    const container = document.getElementById('daily-schedule');
     if (!container) return;
     
     const dailyEvents = events
@@ -777,12 +786,11 @@ function renderDailySchedule() {
     
     container.innerHTML = dailyEvents.map(event => `
         <div class="event-item ${event.completedToday ? 'completed' : ''}" data-id="${event.id}" draggable="true">
-            <div class="drag-handle" title="Drag to reorder">⋮⋮</div>
-            <div class="event-checkbox-container">
+            <div class="drag-handle" title="Drag to reorder">⋮⋮</div>            <div class="event-checkbox-container">
                 <input type="checkbox" 
                        class="event-checkbox" 
                        ${event.completedToday ? 'checked' : ''} 
-                       onchange="toggleTaskCompletion(${event.id}, event)"
+                       onchange="toggleTaskCompletion(${event.id})"
                        aria-label="Mark task as complete">
             </div>
             <div class="event-content">
@@ -807,7 +815,7 @@ function renderDailySchedule() {
 }
 
 function renderWeeklyTasks() {
-    const container = document.getElementById('weekly-events');
+    const container = document.getElementById('weekly-tasks');
     if (!container) return;
     
     const weeklyEvents = events.filter(e => e.schedule === 'weekly');
@@ -839,7 +847,7 @@ function renderWeeklyTasks() {
                             <input type="checkbox" 
                                    class="event-checkbox" 
                                    ${event.completed ? 'checked' : ''} 
-                                   onchange="toggleTaskCompletion(${event.id}, event)"
+                                   onchange="toggleTaskCompletion(${event.id})"
                                    aria-label="Mark task as complete">
                         </div>
                         <div class="event-content">
@@ -868,7 +876,7 @@ function renderWeeklyTasks() {
 }
 
 function renderMonthlyTasks() {
-    const container = document.getElementById('monthly-events');
+    const container = document.getElementById('monthly-tasks');
     if (!container) return;
     
     const monthlyEvents = events.filter(e => e.schedule === 'monthly');
@@ -900,7 +908,7 @@ function renderMonthlyTasks() {
                             <input type="checkbox" 
                                    class="event-checkbox" 
                                    ${event.completed ? 'checked' : ''} 
-                                   onchange="toggleTaskCompletion(${event.id}, event)"
+                                   onchange="toggleTaskCompletion(${event.id})"
                                    aria-label="Mark task as complete">
                         </div>
                         <div class="event-content">
@@ -987,6 +995,80 @@ window.addEventListener('appinstalled', () => {
     showNotification('Schedulez installed successfully!', 'success');
     deferredPrompt = null;
 });
+
+// Modal functions
+function openEventModal(eventId = null) {
+    const modal = document.getElementById('event-modal');
+    const form = document.getElementById('event-form');
+    const title = document.getElementById('modal-title');
+    
+    if (eventId) {
+        // Edit mode
+        const event = events.find(e => e.id === eventId);
+        if (event) {
+            editingEventId = eventId;
+            
+            // Populate form
+            document.getElementById('event-title').value = event.title || '';
+            document.getElementById('event-time').value = event.time || '';
+            document.getElementById('event-category').value = event.category || '';
+            document.getElementById('event-schedule').value = event.schedule || '';
+            document.getElementById('event-day').value = event.day || '';
+            document.getElementById('event-week').value = event.week || '';
+            document.getElementById('event-description').value = event.description || '';
+            
+            title.textContent = 'Edit Event';
+            updateDayWeekFields();
+        }
+    } else {
+        // Add mode
+        editingEventId = null;
+        form.reset();
+        title.textContent = 'Add New Event';
+    }
+    
+    modal.style.display = 'block';
+}
+
+function closeEventModal() {
+    const modal = document.getElementById('event-modal');
+    modal.style.display = 'none';
+    editingEventId = null;
+    
+    // Reset form
+    document.getElementById('event-form').reset();
+}
+
+// Mobile navigation functions
+function toggleMobileNav() {
+    const sidebar = document.querySelector('.sidebar');
+    const isOpen = sidebar.classList.contains('mobile-open');
+    
+    if (isOpen) {
+        sidebar.classList.remove('mobile-open');
+    } else {
+        sidebar.classList.add('mobile-open');
+    }
+}
+
+function initializeMobileNavigation() {
+    // Close mobile nav when clicking outside
+    document.addEventListener('click', function(e) {
+        const sidebar = document.querySelector('.sidebar');
+        const toggleBtn = document.querySelector('.mobile-nav-toggle');
+        
+        if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+            sidebar.classList.remove('mobile-open');
+        }
+    });
+    
+    // Close mobile nav when nav item is clicked
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.remove('mobile-open');
+        });
+    });
+}
 
 // Debug helpers
 window.debugSchedulez = {

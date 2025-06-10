@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hms-v1.1.0';
+const CACHE_NAME = 'schedulez-v1.2.0';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -80,7 +80,7 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification('Home Management System', options)
+    self.registration.showNotification('Schedulez', options)
   );
 });
 

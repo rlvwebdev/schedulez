@@ -112,17 +112,39 @@ body {
     text-align: center;
 }
 
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    justify-content: center;
+}
+
+.logo-icon {
+    width: 3rem;
+    height: 3rem;
+    flex-shrink: 0;
+}
+
+.logo-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+}
+
 .logo h1 {
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--slate-50);
-    margin-bottom: var(--space-2);
+    margin-bottom: var(--space-1);
+    line-height: 1.2;
 }
 
 .logo p {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: var(--slate-400);
     font-weight: 500;
+    line-height: 1.3;
 }
 
 /* Navigation Menu */

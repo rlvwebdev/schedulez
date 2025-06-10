@@ -1,0 +1,60 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle with gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="calendarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e2e8f0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Outer circle background -->
+  <circle cx="60" cy="60" r="56" fill="url(#bgGradient)" stroke="#1e40af" stroke-width="2"/>
+  
+  <!-- Calendar body -->
+  <rect x="25" y="35" width="70" height="60" rx="6" ry="6" fill="url(#calendarGradient)" stroke="#1e40af" stroke-width="1.5"/>
+  
+  <!-- Calendar header -->
+  <rect x="25" y="35" width="70" height="18" rx="6" ry="6" fill="#1e40af"/>
+  <rect x="25" y="44" width="70" height="9" fill="#1e40af"/>
+  
+  <!-- Spiral rings (zippy effect) -->
+  <circle cx="37" cy="30" r="3" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <circle cx="37" cy="30" r="1.5" fill="#ffffff"/>
+  
+  <circle cx="60" cy="30" r="3" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <circle cx="60" cy="30" r="1.5" fill="#ffffff"/>
+  
+  <circle cx="83" cy="30" r="3" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <circle cx="83" cy="30" r="1.5" fill="#ffffff"/>
+  
+  <!-- Calendar grid lines -->
+  <line x1="25" y1="62" x2="95" y2="62" stroke="#cbd5e1" stroke-width="0.5"/>
+  <line x1="25" y1="75" x2="95" y2="75" stroke="#cbd5e1" stroke-width="0.5"/>
+  <line x1="25" y1="88" x2="95" y2="88" stroke="#cbd5e1" stroke-width="0.5"/>
+  
+  <line x1="40" y1="53" x2="40" y2="95" stroke="#cbd5e1" stroke-width="0.5"/>
+  <line x1="55" y1="53" x2="55" y2="95" stroke="#cbd5e1" stroke-width="0.5"/>
+  <line x1="70" y1="53" x2="70" y2="95" stroke="#cbd5e1" stroke-width="0.5"/>
+  <line x1="85" y1="53" x2="85" y2="95" stroke="#cbd5e1" stroke-width="0.5"/>
+  
+  <!-- Active date highlight -->
+  <rect x="56" y="59" width="12" height="12" rx="2" ry="2" fill="#3b82f6"/>
+  
+  <!-- Calendar dates -->
+  <text x="32" y="68" fill="#64748b" font-family="Arial, sans-serif" font-size="8" text-anchor="middle">1</text>
+  <text x="47" y="68" fill="#64748b" font-family="Arial, sans-serif" font-size="8" text-anchor="middle">2</text>
+  <text x="62" y="68" fill="#ffffff" font-family="Arial, sans-serif" font-size="8" font-weight="bold" text-anchor="middle">3</text>
+  <text x="77" y="68" fill="#64748b" font-family="Arial, sans-serif" font-size="8" text-anchor="middle">4</text>
+  
+  <text x="32" y="81" fill="#64748b" font-family="Arial, sans-serif" font-size="8" text-anchor="middle">8</text>
+  <text x="47" y="81" fill="#64748b" font-family="Arial, sans-serif" font-size="8" text-anchor="middle">9</text>
+  <text x="62" y="81" fill="#64748b" font-family="Arial, sans-serif" font-size="8" text-anchor="middle">10</text>
+  <text x="77" y="81" fill="#64748b" font-family="Arial, sans-serif" font-size="8" text-anchor="middle">11</text>
+  
+  <!-- Brand text -->
+  <text x="60" y="110" fill="#ffffff" font-family="Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle">SCHEDULEZ</text>
+</svg>

@@ -402,9 +402,7 @@ document.addEventListener('DOMContentLoaded', function() {
             initializeWithErrorHandling('Data Management', initializeDataManagement),
             initializeWithErrorHandling('Progress Tracking', initializeProgressTracking),
             initializeWithErrorHandling('Focus Management', initializeFocusManagement)
-        ];
-        
-        // Execute initialization tasks
+        ];        // Execute initialization tasks
         Promise.allSettled(initPromises).then(results => {
             let failedInits = [];
             results.forEach((result, index) => {
@@ -421,6 +419,18 @@ document.addEventListener('DOMContentLoaded', function() {
             // Always try to render views and update stats
             renderAllViews();
             updateProgressStats();
+            
+            // Initialize analytics integration
+            initializeAnalyticsIntegration();
+            
+            // Update dashboard with analytics integration
+            setTimeout(() => {
+                if (typeof updateDashboardWithAnalytics === 'function') {
+                    updateDashboardWithAnalytics();
+                } else {
+                    updateDashboard();
+                }
+            }, 500);
             
             console.log('✅ App initialization completed');
         });
@@ -637,7 +647,7 @@ setInterval(() => {
     preventMemoryLeaks();
 }, 60000); // Every minute
 
-// Navigation functionality
+// Navigation functionality with enhanced header management
 function initializeNavigation() {
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', function(e) {
@@ -652,7 +662,16 @@ function initializeNavigation() {
             document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
             // Show selected page
             const pageId = this.getAttribute('data-page');
-            document.getElementById(pageId).classList.add('active');
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+            }
+            
+            // Update page headers
+            updatePageHeaders(pageId);
+            
+            // Call enhanced content switching
+            showContent(pageId);
             
             // Update URL hash
             window.location.hash = pageId;
@@ -665,6 +684,12 @@ function initializeNavigation() {
         const targetLink = document.querySelector(`[data-page="${targetPage}"]`);
         if (targetLink) {
             targetLink.click();
+        }
+    } else {
+        // Default to dashboard
+        const dashboardLink = document.querySelector('[data-page="dashboard"]');
+        if (dashboardLink) {
+            dashboardLink.click();
         }
     }
 }
@@ -841,24 +866,71 @@ function toggleTaskCompletion(id) {
     
     const task = events[eventIndex];
     const now = new Date();
+    let wasCompleted = false;
+    let isNowCompleted = false;
     
     if (task.schedule === 'daily') {
+        wasCompleted = task.completedToday;
         task.completedToday = !task.completedToday;
+        isNowCompleted = task.completedToday;
         if (task.completedToday) {
             task.lastCompleted = now.toISOString();
         }
     } else {
+        wasCompleted = task.completed;
         task.completed = !task.completed;
+        isNowCompleted = task.completed;
         if (task.completed) {
             task.lastCompleted = now.toISOString();
         }
     }
     
+    // Record analytics data for task completion
+    recordTaskCompletion(id, isNowCompleted);
+    
     saveEvents();
+      // Update dashboard stats immediately
+    if (typeof updateDashboardWithAnalytics === 'function') {
+        updateDashboardWithAnalytics();
+    } else if (typeof updateDashboard === 'function') {
+        updateDashboard();
+    }
+    
+    // Refresh the current view to show updated completion state
+    updateProgressStats();
+    refreshCurrentView();
+    
     showNotification(
-        `Task ${task.completed || task.completedToday ? 'completed' : 'uncompleted'}!`, 
+        `Task ${isNowCompleted ? 'completed' : 'uncompleted'}!`, 
         'success'
     );
+}
+
+// Refresh the current active view
+function refreshCurrentView() {
+    const activePage = document.querySelector('.page.active');
+    if (!activePage) return;
+    
+    const pageId = activePage.id;
+    
+    switch (pageId) {
+        case 'dashboard':
+            renderTodaySchedule();
+            updateDashboard();
+            break;
+        case 'daily-schedule':
+            renderDailySchedule();
+            break;
+        case 'weekly-tasks':
+            renderWeeklyTasks();
+            break;
+        case 'monthly-tasks':
+            renderMonthlyTasks();
+            break;
+        case 'manage-events':
+            renderManageEvents();
+            break;
+    }
 }
 
 function updateProgressStats() {
@@ -884,9 +956,9 @@ function updateProgressStats() {
 }
 
 function updateProgressBar(id, completed, total) {
-    const progressBar = document.getElementById(id);
-    const progressFill = progressBar?.querySelector('.progress-fill');
-    const progressText = progressBar?.querySelector('.progress-text');
+    // New structure with separate fill and text elements
+    const progressFill = document.getElementById(`${id}-fill`);
+    const progressText = document.getElementById(`${id}-text`);
     
     if (progressFill && progressText) {
         const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
@@ -894,8 +966,11 @@ function updateProgressBar(id, completed, total) {
         progressText.textContent = `${completed}/${total} (${percentage}%)`;
         
         // Add completion classes for styling
-        progressBar.classList.toggle('progress-complete', percentage === 100);
-        progressBar.classList.toggle('progress-high', percentage >= 80 && percentage < 100);
+        const progressBar = progressFill.closest('.progress-bar');
+        if (progressBar) {
+            progressBar.classList.toggle('progress-complete', percentage === 100);
+            progressBar.classList.toggle('progress-high', percentage >= 80 && percentage < 100);
+        }
     }
 }
 
@@ -1030,6 +1105,40 @@ function performSearch(query) {
     searchResults.innerHTML = html;
 }
 
+// Event Card Dropdown Functions
+function toggleEventDropdown(dropdownElement) {
+    // Close all other dropdowns first
+    closeAllDropdowns();
+    
+    // Toggle this dropdown
+    dropdownElement.classList.toggle('open');
+    
+    // Add event listener to close when clicking outside
+    if (dropdownElement.classList.contains('open')) {
+        setTimeout(() => {
+            document.addEventListener('click', closeDropdownOnOutsideClick);
+        }, 0);
+    }
+}
+
+function closeAllDropdowns() {
+    document.querySelectorAll('.event-card-dropdown.open').forEach(dropdown => {
+        dropdown.classList.remove('open');
+    });
+    document.removeEventListener('click', closeDropdownOnOutsideClick);
+}
+
+function closeDropdownOnOutsideClick(event) {
+    const dropdown = event.target.closest('.event-card-dropdown');
+    if (!dropdown) {
+        closeAllDropdowns();
+    }
+}
+
+// Make dropdown functions globally available
+window.toggleEventDropdown = toggleEventDropdown;
+window.closeAllDropdowns = closeAllDropdowns;
+
 // Utility functions
 function formatTime(time24) {
     const [hours, minutes] = time24.split(':');
@@ -1058,26 +1167,52 @@ function renderDailySchedule() {
     const container = document.getElementById('daily-schedule');
     
     if (!container) return;
-    
-    container.innerHTML = dailyEvents.map((event, index) => `
-        <div class="time-block sortable-item ${isTaskCompleted(event) ? 'completed' : ''}" data-event-id="${event.id}" data-index="${index}">
-            <div class="time">
-                <span class="drag-handle" title="Drag to reorder">⋮⋮</span>
-                ${formatTime(event.time)}
+      container.innerHTML = dailyEvents.map((event, index) => `
+        <div class="event-card category-${event.category} ${isTaskCompleted(event) ? 'completed' : ''}" data-event-id="${event.id}" data-index="${index}">
+            <div class="event-card-header category-${event.category}">
+                <div class="event-card-drag-handle" title="Drag to reorder">⋮⋮</div>
+                <div class="event-card-title-time">
+                    <h3 class="event-card-title">${escapeHTML(event.title)}</h3>
+                    <div class="event-card-time">${formatTime(event.time)}</div>
+                </div>
+                <div class="event-card-dropdown" onclick="toggleEventDropdown(this)">
+                    <button class="event-card-dropdown-trigger">
+                        <span>⚙️</span>
+                        <span class="event-card-dropdown-icon">▼</span>
+                    </button>
+                    <div class="event-card-dropdown-menu">
+                        <button class="event-card-dropdown-item" onclick="editEvent(${event.id}); closeAllDropdowns();">
+                            <span>✏️</span> Edit
+                        </button>
+                        <button class="event-card-dropdown-item danger" onclick="deleteEvent(${event.id}); closeAllDropdowns();">
+                            <span>🗑️</span> Delete
+                        </button>
+                    </div>
+                </div>
+                <div class="event-card-completion">
+                    <input type="checkbox" 
+                           class="event-card-checkbox" 
+                           ${isTaskCompleted(event) ? 'checked' : ''} 
+                           onchange="toggleTaskCompletion(${event.id})"
+                           title="Mark as ${isTaskCompleted(event) ? 'incomplete' : 'completed'}">
+                </div>
             </div>
-            <div class="task">
-                <span class="task-type ${event.category}">${capitalizeFirst(event.category)}</span>
-                ${event.title}
-                ${event.description ? `<br><small class="event-description">${event.description}</small>` : ''}
-            </div>
-            <div class="task-actions">
-                <label class="completion-checkbox" title="Mark as ${isTaskCompleted(event) ? 'incomplete' : 'completed'}">
-                    <input type="checkbox" ${isTaskCompleted(event) ? 'checked' : ''} onchange="toggleTaskCompletion(${event.id})">
-                    <span class="checkmark">${isTaskCompleted(event) ? '✅' : '☐'}</span>
-                </label>
-                <button class="btn btn-warning btn-sm" onclick="openEventModal(${event.id})" title="Edit">✏️</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteEvent(${event.id})" title="Delete">🗑️</button>
-            </div>
+            ${event.description ? `
+                <div class="event-card-body">
+                    <div class="event-card-description">${escapeHTML(event.description)}</div>
+                    <div class="event-card-tags">
+                        <span class="event-card-tag tag-${event.category}">${capitalizeFirst(event.category)}</span>
+                        <span class="event-card-tag tag-${event.schedule}">${capitalizeFirst(event.schedule)}</span>
+                    </div>
+                </div>
+            ` : `
+                <div class="event-card-body">
+                    <div class="event-card-tags">
+                        <span class="event-card-tag tag-${event.category}">${capitalizeFirst(event.category)}</span>
+                        <span class="event-card-tag tag-${event.schedule}">${capitalizeFirst(event.schedule)}</span>
+                    </div>
+                </div>
+            `}
         </div>
     `).join('');
     
@@ -1099,26 +1234,54 @@ function renderWeeklyTasks() {
                     📅 ${capitalizeFirst(day)}
                     <button class="btn btn-primary btn-sm" onclick="openEventModal()" title="Add Event">+</button>
                 </h3>
-                <div class="task-list-container sortable-container">
-                    ${dayEvents.map((event, index) => `
-                        <div class="time-block sortable-item ${isTaskCompleted(event) ? 'completed' : ''}" data-event-id="${event.id}" data-index="${index}">
-                            <div class="time">
-                                <span class="drag-handle" title="Drag to reorder">⋮⋮</span>
-                                ${formatTime(event.time)}
+                <div class="task-list-container sortable-container">                    ${dayEvents.map((event, index) => `
+                        <div class="event-card category-${event.category} ${isTaskCompleted(event) ? 'completed' : ''}" data-event-id="${event.id}" data-index="${index}">
+                            <div class="event-card-header category-${event.category}">
+                                <div class="event-card-drag-handle" title="Drag to reorder">⋮⋮</div>
+                                <div class="event-card-title-time">
+                                    <h3 class="event-card-title">${escapeHTML(event.title)}</h3>
+                                    <div class="event-card-time">${formatTime(event.time)}</div>
+                                </div>
+                                <div class="event-card-dropdown" onclick="toggleEventDropdown(this)">
+                                    <button class="event-card-dropdown-trigger">
+                                        <span>⚙️</span>
+                                        <span class="event-card-dropdown-icon">▼</span>
+                                    </button>
+                                    <div class="event-card-dropdown-menu">
+                                        <button class="event-card-dropdown-item" onclick="editEvent(${event.id}); closeAllDropdowns();">
+                                            <span>✏️</span> Edit
+                                        </button>
+                                        <button class="event-card-dropdown-item danger" onclick="deleteEvent(${event.id}); closeAllDropdowns();">
+                                            <span>🗑️</span> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="event-card-completion">
+                                    <input type="checkbox" 
+                                           class="event-card-checkbox" 
+                                           ${isTaskCompleted(event) ? 'checked' : ''} 
+                                           onchange="toggleTaskCompletion(${event.id})"
+                                           title="Mark as ${isTaskCompleted(event) ? 'incomplete' : 'completed'}">
+                                </div>
                             </div>
-                            <div class="task">
-                                <span class="task-type ${event.category}">${capitalizeFirst(event.category)}</span>
-                                ${event.title}
-                                ${event.description ? `<br><small class="event-description">${event.description}</small>` : ''}
-                            </div>
-                            <div class="task-actions">
-                                <label class="completion-checkbox" title="Mark as ${isTaskCompleted(event) ? 'incomplete' : 'completed'}">
-                                    <input type="checkbox" ${isTaskCompleted(event) ? 'checked' : ''} onchange="toggleTaskCompletion(${event.id})">
-                                    <span class="checkmark">${isTaskCompleted(event) ? '✅' : '☐'}</span>
-                                </label>
-                                <button class="btn btn-warning btn-sm" onclick="openEventModal(${event.id})" title="Edit">✏️</button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteEvent(${event.id})" title="Delete">🗑️</button>
-                            </div>
+                            ${event.description ? `
+                                <div class="event-card-body">
+                                    <div class="event-card-description">${escapeHTML(event.description)}</div>
+                                    <div class="event-card-tags">
+                                        <span class="event-card-tag tag-${event.category}">${capitalizeFirst(event.category)}</span>
+                                        <span class="event-card-tag tag-${event.schedule}">${capitalizeFirst(event.schedule)}</span>
+                                        <span class="event-card-tag tag-${event.day}">${capitalizeFirst(event.day)}</span>
+                                    </div>
+                                </div>
+                            ` : `
+                                <div class="event-card-body">
+                                    <div class="event-card-tags">
+                                        <span class="event-card-tag tag-${event.category}">${capitalizeFirst(event.category)}</span>
+                                        <span class="event-card-tag tag-${event.schedule}">${capitalizeFirst(event.schedule)}</span>
+                                        <span class="event-card-tag tag-${event.day}">${capitalizeFirst(event.day)}</span>
+                                    </div>
+                                </div>
+                            `}
                         </div>
                     `).join('')}
                 </div>
@@ -1144,26 +1307,54 @@ function renderMonthlyTasks() {
                     🗓️ ${capitalizeFirst(week)} Week
                     <button class="btn btn-primary btn-sm" onclick="openEventModal()" title="Add Event">+</button>
                 </h3>
-                <div class="task-list-container sortable-container">
-                    ${weekEvents.map((event, index) => `
-                        <div class="time-block sortable-item ${isTaskCompleted(event) ? 'completed' : ''}" data-event-id="${event.id}" data-index="${index}">
-                            <div class="time">
-                                <span class="drag-handle" title="Drag to reorder">⋮⋮</span>
-                                ${formatTime(event.time)}
+                <div class="task-list-container sortable-container">                    ${weekEvents.map((event, index) => `
+                        <div class="event-card category-${event.category} ${isTaskCompleted(event) ? 'completed' : ''}" data-event-id="${event.id}" data-index="${index}">
+                            <div class="event-card-header category-${event.category}">
+                                <div class="event-card-drag-handle" title="Drag to reorder">⋮⋮</div>
+                                <div class="event-card-title-time">
+                                    <h3 class="event-card-title">${escapeHTML(event.title)}</h3>
+                                    <div class="event-card-time">${formatTime(event.time)}</div>
+                                </div>
+                                <div class="event-card-dropdown" onclick="toggleEventDropdown(this)">
+                                    <button class="event-card-dropdown-trigger">
+                                        <span>⚙️</span>
+                                        <span class="event-card-dropdown-icon">▼</span>
+                                    </button>
+                                    <div class="event-card-dropdown-menu">
+                                        <button class="event-card-dropdown-item" onclick="editEvent(${event.id}); closeAllDropdowns();">
+                                            <span>✏️</span> Edit
+                                        </button>
+                                        <button class="event-card-dropdown-item danger" onclick="deleteEvent(${event.id}); closeAllDropdowns();">
+                                            <span>🗑️</span> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="event-card-completion">
+                                    <input type="checkbox" 
+                                           class="event-card-checkbox" 
+                                           ${isTaskCompleted(event) ? 'checked' : ''} 
+                                           onchange="toggleTaskCompletion(${event.id})"
+                                           title="Mark as ${isTaskCompleted(event) ? 'incomplete' : 'completed'}">
+                                </div>
                             </div>
-                            <div class="task">
-                                <span class="task-type ${event.category}">${capitalizeFirst(event.category)}</span>
-                                ${event.title}
-                                ${event.description ? `<br><small class="event-description">${event.description}</small>` : ''}
-                            </div>
-                            <div class="task-actions">
-                                <label class="completion-checkbox" title="Mark as ${isTaskCompleted(event) ? 'incomplete' : 'completed'}">
-                                    <input type="checkbox" ${isTaskCompleted(event) ? 'checked' : ''} onchange="toggleTaskCompletion(${event.id})">
-                                    <span class="checkmark">${isTaskCompleted(event) ? '✅' : '☐'}</span>
-                                </label>
-                                <button class="btn btn-warning btn-sm" onclick="openEventModal(${event.id})" title="Edit">✏️</button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteEvent(${event.id})" title="Delete">🗑️</button>
-                            </div>
+                            ${event.description ? `
+                                <div class="event-card-body">
+                                    <div class="event-card-description">${escapeHTML(event.description)}</div>
+                                    <div class="event-card-tags">
+                                        <span class="event-card-tag tag-${event.category}">${capitalizeFirst(event.category)}</span>
+                                        <span class="event-card-tag tag-${event.schedule}">${capitalizeFirst(event.schedule)}</span>
+                                        <span class="event-card-tag tag-${event.week}">${capitalizeFirst(event.week)} Week</span>
+                                    </div>
+                                </div>
+                            ` : `
+                                <div class="event-card-body">
+                                    <div class="event-card-tags">
+                                        <span class="event-card-tag tag-${event.category}">${capitalizeFirst(event.category)}</span>
+                                        <span class="event-card-tag tag-${event.schedule}">${capitalizeFirst(event.schedule)}</span>
+                                        <span class="event-card-tag tag-${event.week}">${capitalizeFirst(event.week)} Week</span>
+                                    </div>
+                                </div>
+                            `}
                         </div>
                     `).join('')}
                 </div>
@@ -1246,54 +1437,69 @@ function renderManageEvents() {
     
     container.innerHTML = sortedEvents.map((event, index) => {
         const isCompleted = event.schedule === 'daily' ? event.completedToday : event.completed;
-        
-        return `
-            <div class="event-item ${isCompleted ? 'completed' : ''}" 
+          return `
+            <div class="event-card category-${event.category} ${isCompleted ? 'completed' : ''}" 
                  data-id="${event.id}" 
                  draggable="true"
                  role="listitem"
                  aria-label="Event: ${escapeHTML(event.title)} scheduled for ${escapeHTML(event.schedule)}"
                  aria-describedby="event-manage-desc-${event.id}"
                  tabindex="0">
-                <div class="drag-handle" 
-                     title="Drag to reorder" 
-                     aria-label="Drag handle for ${escapeHTML(event.title)}"
-                     role="button"
-                     tabindex="0"
-                     onkeydown="handleDragKeydown(event, ${event.id})">⋮⋮</div>
-                <div class="event-checkbox-container">
-                    <input type="checkbox" 
-                           class="event-checkbox" 
-                           id="manage-checkbox-${event.id}"
-                           ${isCompleted ? 'checked' : ''} 
-                           onchange="toggleTaskCompletion(${event.id})"
-                           aria-label="Mark ${escapeHTML(event.title)} as ${isCompleted ? 'incomplete' : 'complete'}">
-                </div>
-                <div class="event-content">
-                    <div class="event-header">
-                        <h4 class="event-title" id="manage-title-${event.id}">${escapeHTML(event.title)}</h4>
-                        <div class="event-meta">
-                            <span class="event-time" aria-label="Scheduled time">${escapeHTML(event.time)}</span>
-                            <span class="event-category category-${escapeHTML(event.category)}" 
-                                  aria-label="Category: ${escapeHTML(event.category)}">${escapeHTML(event.category)}</span>
-                            <span class="event-schedule" aria-label="Schedule type">${escapeHTML(event.schedule)}</span>
-                            ${event.day ? `<span class="event-day" aria-label="Day: ${escapeHTML(event.day)}">${escapeHTML(event.day)}</span>` : ''}
-                            ${event.week ? `<span class="event-week" aria-label="Week: ${escapeHTML(event.week)}">${escapeHTML(event.week)}</span>` : ''}
+                <div class="event-card-header category-${event.category}">
+                    <div class="event-card-drag-handle" 
+                         title="Drag to reorder" 
+                         aria-label="Drag handle for ${escapeHTML(event.title)}"
+                         role="button"
+                         tabindex="0"
+                         onkeydown="handleDragKeydown(event, ${event.id})">⋮⋮</div>
+                    <div class="event-card-title-time">
+                        <h3 class="event-card-title">${escapeHTML(event.title)}</h3>
+                        <div class="event-card-time">${formatTime(event.time)}</div>
+                    </div>
+                    <div class="event-card-dropdown" onclick="toggleEventDropdown(this)">
+                        <button class="event-card-dropdown-trigger">
+                            <span>⚙️</span>
+                            <span class="event-card-dropdown-icon">▼</span>
+                        </button>
+                        <div class="event-card-dropdown-menu">
+                            <button class="event-card-dropdown-item" onclick="editEvent(${event.id}); closeAllDropdowns();">
+                                <span>✏️</span> Edit
+                            </button>
+                            <button class="event-card-dropdown-item danger" onclick="deleteEvent(${event.id}); closeAllDropdowns();">
+                                <span>🗑️</span> Delete
+                            </button>
                         </div>
                     </div>
-                    ${event.description ? `<p class="event-description" id="event-manage-desc-${event.id}">${escapeHTML(event.description)}</p>` : ''}
-                    ${event.lastCompleted ? `<p class="event-last-completed" aria-label="Last completed on">Last completed: ${new Date(event.lastCompleted).toLocaleString()}</p>` : ''}
+                    <div class="event-card-completion">
+                        <input type="checkbox" 
+                               class="event-card-checkbox" 
+                               id="manage-checkbox-${event.id}"
+                               ${isCompleted ? 'checked' : ''} 
+                               onchange="toggleTaskCompletion(${event.id})"
+                               aria-label="Mark ${escapeHTML(event.title)} as ${isCompleted ? 'incomplete' : 'complete'}">
+                    </div>
                 </div>
-                <div class="event-actions" role="group" aria-label="Event actions">
-                    <button onclick="editEvent(${event.id})" 
-                            class="btn-edit" 
-                            title="Edit ${escapeHTML(event.title)}" 
-                            aria-label="Edit event: ${escapeHTML(event.title)}">✏️</button>
-                    <button onclick="deleteEvent(${event.id})" 
-                            class="btn-delete" 
-                            title="Delete ${escapeHTML(event.title)}" 
-                            aria-label="Delete event: ${escapeHTML(event.title)}">🗑️</button>
-                </div>
+                ${event.description || event.lastCompleted ? `
+                    <div class="event-card-body">
+                        ${event.description ? `<div class="event-card-description" id="event-manage-desc-${event.id}">${escapeHTML(event.description)}</div>` : ''}
+                        ${event.lastCompleted ? `<div class="event-card-description">Last completed: ${new Date(event.lastCompleted).toLocaleString()}</div>` : ''}
+                        <div class="event-card-tags">
+                            <span class="event-card-tag tag-${event.category}">${capitalizeFirst(event.category)}</span>
+                            <span class="event-card-tag tag-${event.schedule}">${capitalizeFirst(event.schedule)}</span>
+                            ${event.day ? `<span class="event-card-tag tag-${event.day}">${capitalizeFirst(event.day)}</span>` : ''}
+                            ${event.week ? `<span class="event-card-tag tag-${event.week}">${capitalizeFirst(event.week)} Week</span>` : ''}
+                        </div>
+                    </div>
+                ` : `
+                    <div class="event-card-body">
+                        <div class="event-card-tags">
+                            <span class="event-card-tag tag-${event.category}">${capitalizeFirst(event.category)}</span>
+                            <span class="event-card-tag tag-${event.schedule}">${capitalizeFirst(event.schedule)}</span>
+                            ${event.day ? `<span class="event-card-tag tag-${event.day}">${capitalizeFirst(event.day)}</span>` : ''}
+                            ${event.week ? `<span class="event-card-tag tag-${event.week}">${capitalizeFirst(event.week)} Week</span>` : ''}
+                        </div>
+                    </div>
+                `}
             </div>
         `;
     }).join('');
@@ -1744,6 +1950,8 @@ function openEventModal(eventId = null) {
         title.textContent = 'Add New Event';
     }
     
+   
+    
     modal.style.display = 'block';
 }
 
@@ -1845,3 +2053,213 @@ window.debugSchedulez = {
 };
 
 console.log('✅ Schedulez loaded successfully!');
+
+// Analytics and Yearly Goals Integration
+// Import analytics and yearly goals modules when they're loaded
+
+// Analytics page rendering
+function renderAnalyticsPage() {
+    const container = document.getElementById('analytics-content');
+    if (!container) {
+        // Try to find the analytics page container
+        const analyticsPage = document.getElementById('analytics');
+        if (analyticsPage) {
+            const contentDiv = analyticsPage.querySelector('#analytics-content') || analyticsPage;
+            if (typeof renderAnalytics === 'function') {
+                contentDiv.innerHTML = '';
+                renderAnalytics();
+            } else {
+                contentDiv.innerHTML = '<div class="loading-message">📊 Loading analytics...</div>';
+            }
+        }
+        return;
+    }
+    
+    // Initialize analytics if available
+    if (typeof renderAnalytics === 'function') {
+        renderAnalytics();
+    } else {
+        console.warn('Analytics module not loaded');
+        container.innerHTML = '<div class="loading-message">📊 Loading analytics...</div>';
+    }
+}
+
+// Yearly goals page rendering
+function renderYearlyGoalsPage() {
+    const container = document.getElementById('yearly-goals-content');
+    if (!container) {
+        // Try to find the yearly goals page container
+        const goalsPage = document.getElementById('yearly-goals');
+        if (goalsPage) {
+            const contentDiv = goalsPage.querySelector('#yearly-goals-content') || goalsPage;
+            if (typeof renderYearlyGoals === 'function') {
+                contentDiv.innerHTML = '';
+                renderYearlyGoals();
+            } else {
+                contentDiv.innerHTML = '<div class="loading-message">🎯 Loading yearly goals...</div>';
+            }
+        }
+        return;
+    }
+    
+    // Initialize yearly goals if available
+    if (typeof renderYearlyGoals === 'function') {
+        renderYearlyGoals();
+    } else {
+        console.warn('Yearly goals module not loaded');
+        container.innerHTML = '<div class="loading-message">🎯 Loading yearly goals...</div>';
+    }
+}
+
+// Navigation handlers for analytics features
+function navigateToAnalytics() {
+    showContent('analytics');
+    renderAnalyticsPage();
+    updateActiveNav('analytics');
+}
+
+function navigateToYearlyGoals() {
+    showContent('yearly-goals');
+    renderYearlyGoalsPage();
+    updateActiveNav('yearly-goals');
+}
+
+// Enhanced content switching to support new pages
+function showContent(contentType) {
+    // Hide all content sections
+    const sections = ['dashboard', 'daily', 'weekly', 'monthly', 'manage', 'analytics', 'yearly-goals'];
+    sections.forEach(section => {
+        const element = document.getElementById(section);
+        if (element) {
+            element.style.display = 'none';
+        }
+    });
+    
+    // Show selected content
+    const selectedElement = document.getElementById(contentType);
+    if (selectedElement) {
+        selectedElement.style.display = 'block';
+    }
+    
+    // Handle special cases for new pages
+    switch (contentType) {
+        case 'analytics':
+            renderAnalyticsPage();
+            break;
+        case 'yearly-goals':
+            renderYearlyGoalsPage();
+            break;
+        case 'dashboard':
+            // Update dashboard with analytics integration if available
+            if (typeof updateDashboardWithAnalytics === 'function') {
+                updateDashboardWithAnalytics();
+            } else {
+                updateDashboard();
+            }
+            break;
+        default:
+            // Use existing render functions for other pages
+            if (contentType === 'daily') renderDailySchedule();
+            if (contentType === 'weekly') renderWeeklyTasks();
+            if (contentType === 'monthly') renderMonthlyTasks();
+            if (contentType === 'manage') renderManageEvents();
+    }
+}
+
+// Make showContent globally available
+window.showContent = showContent;
+
+// Enhanced Drag and Drop functionality
+function reorderEvents(draggedId, targetId) {
+    const draggedIndex = events.findIndex(e => e.id === draggedId);
+    const targetIndex = events.findIndex(e => e.id === targetId);
+    
+    if (draggedIndex === -1 || targetIndex === -1) return;
+    
+    // Move dragged event to new position
+    const [movedEvent] = events.splice(draggedIndex, 1);
+    events.splice(targetIndex, 0, movedEvent);
+    
+    // Update IDs and indices
+    events.forEach((event, index) => {
+        event.id = `event_${index}_${Date.now().toString(36)}`;
+    });
+    
+    saveEvents();
+    renderAllViews();
+}
+
+// Recalculate event times based on new position
+function recalculateEventTimes(schedule, day, week) {
+    // Placeholder for advanced scheduling logic
+    // For now, just log the change
+    console.log(`Recalculating times for ${schedule} event on ${day} of ${week}`);
+}
+
+// Initialize analytics integration
+function initializeAnalyticsIntegration() {
+    createAnalyticsContainer();
+    
+    // Load analytics modules if available
+    Promise.all([
+        import('./analytics.js').catch(() => null),
+        import('./yearly-goals.js').catch(() => null),
+        import('./dashboard.js').catch(() => null)
+    ]).then(([analyticsModule, goalsModule, dashboardModule]) => {
+        if (analyticsModule) {
+            // Make analytics functions globally available
+            window.renderAnalytics = analyticsModule.renderAnalytics;
+            window.initializeAnalytics = analyticsModule.initializeAnalytics;
+            window.recordTaskCompletion = analyticsModule.recordTaskCompletion;
+            window.exportAnalyticsData = analyticsModule.exportAnalyticsData;
+            
+            // Initialize analytics
+            if (analyticsModule.initializeAnalytics) {
+                analyticsModule.initializeAnalytics();
+            }
+        }
+        
+        if (goalsModule) {
+            // Make yearly goals functions globally available
+            window.renderYearlyGoals = goalsModule.renderYearlyGoals;
+            window.initializeYearlyGoals = goalsModule.initializeYearlyGoals;
+            window.openGoalModal = goalsModule.openGoalModal;
+            window.saveGoal = goalsModule.saveGoal;
+            window.exportGoalsData = goalsModule.exportGoalsData;
+            
+            // Initialize yearly goals
+            if (goalsModule.initializeYearlyGoals) {
+                goalsModule.initializeYearlyGoals();
+            }
+        }
+        
+        if (dashboardModule) {
+            // Make enhanced dashboard functions globally available
+            window.updateDashboardWithAnalytics = dashboardModule.updateDashboardWithAnalytics;
+            window.updateDashboardStats = dashboardModule.updateDashboardStats;
+            window.getCompletionSummary = dashboardModule.getCompletionSummary;
+        }
+    });
+}
+
+// Create analytics container if it doesn't exist
+function createAnalyticsContainer() {
+    const mainContent = document.querySelector('.main-content');
+    if (!mainContent) return;
+    
+    // Add analytics content container if it doesn't exist
+    if (!document.getElementById('analytics-content')) {
+        const analyticsDiv = document.createElement('div');
+        analyticsDiv.id = 'analytics-content';
+        analyticsDiv.style.display = 'none';
+        mainContent.appendChild(analyticsDiv);
+    }
+    
+    // Add yearly goals content container if it doesn't exist
+    if (!document.getElementById('yearly-goals-content')) {
+        const goalsDiv = document.createElement('div');
+        goalsDiv.id = 'yearly-goals-content';
+        goalsDiv.style.display = 'none';
+        mainContent.appendChild(goalsDiv);
+    }
+}

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Schedulez - Smart Home Management System</title>
+    <title>Schedulez - For Me.</title>
       <!-- Favicon -->
     <link rel="icon" href="assets/icons/favicon-16.svg" type="image/svg+xml">
     <link rel="alternate icon" href="assets/icons/favicon.ico">
@@ -24,25 +24,39 @@
     <meta name="msapplication-tap-highlight" content="no">
     
     <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
-      <!-- CSS Stylesheet -->
+    <link rel="manifest" href="manifest.json">    <!-- CSS Stylesheet -->
     <link rel="stylesheet" href="src/css/styles.css">
+    
+    <!-- Framer Motion CDN -->
+    <script src="https://unpkg.com/framer-motion@11/dist/framer-motion.js"></script>
     
     <!-- Icons for different platforms -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzY2N2VlYSIvPgo8cGF0aCBkPSJNMTYgOEwxMSAxM0gxM1YxNkgxOVYxM0gyMUwxNiA4WiIgZmlsbD0id2hpdGUiLz4KPHA+dGggZD0iTTggMTdIMTNWMjJIOFYxN1oiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik08IDI0SDEzVjI5SDhWMjRaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMTkgMjRIMjRWMjlIMTlWMjRaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K">
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iMzAiIGZpbGw9IiM2NjdlZWEiLz4KPHA+dGggZD0iTTkwIDQ1TDYwIDc1SDc1Vjg5SDEwNVY3NUgxMjBMOTAgNDVaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNDUgOThINzVWMTI4SDQ1Vjk4WiIgZmlsbD0id2hpdGUiLz4KPHA+dGggZD0iTTEwNSA5OEgxMzVWMTI4SDEwNVY5OFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik00NSAxMzVINzVWMTY1SDQ1VjEzNVoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMDUgMTM1SDEzNVYxNjVIMTA1VjEzNVoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=">
 </head>
-<body>    <!-- Mobile Navigation Toggle -->
-    <button id="mobile-nav-toggle" class="mobile-nav-toggle" aria-expanded="false" aria-label="Toggle navigation menu">
-        <span class="nav-icon">☰</span>
-    </button>
+<body>
+    <!-- Mobile Header Bar -->
+    <header class="app-header md:hidden">
+        <div class="header-content">
+            <button id="mobile-nav-toggle" class="mobile-nav-toggle p-2 rounded-lg hover:bg-slate-100 transition-colors" aria-expanded="false" aria-label="Toggle navigation menu">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+            <div class="flex-1 text-center">
+                <div class="header-title">Schedulez</div>
+                <div class="header-subtitle">Smart Home Management</div>
+            </div>
+            <div class="w-8 h-8"></div> <!-- Spacer for balance -->
+        </div>
+    </header>
 
     <!-- Mobile Navigation Backdrop -->
-    <div id="mobile-nav-backdrop" class="mobile-nav-backdrop"></div>
-
-    <div class="container">
-        <!-- Sidebar Navigation -->        <aside class="sidebar">
-            <div class="logo">
+    <div id="mobile-nav-backdrop" class="mobile-nav-backdrop"></div>    <div class="container">
+        <!-- Desktop Sidebar Navigation -->
+        <aside class="sidebar">
+            <!-- Sidebar Header -->
+            <div class="logo border-b border-slate-700 pb-4 mb-4">
                 <div class="logo-container">
                     <img src="assets/icons/schedulez-logo.svg" alt="Schedulez Logo" class="logo-icon">
                     <div class="logo-text">
@@ -51,12 +65,13 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Navigation Menu -->
             <nav>
-                <ul class="nav-menu">
-                    <li class="nav-item">
+                <ul class="nav-menu"><li class="nav-item">
                         <a href="#" class="nav-link active" data-page="dashboard">
-                            <span class="nav-icon">📊</span>
-                            Dashboard
+                            <span class="nav-icon">🏠</span>
+                            Today
                         </a>
                     </li>
                     <li class="nav-item">
@@ -83,107 +98,140 @@
                             Manage Events
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="analytics">
+                            <span class="nav-icon">📈</span>
+                            My Stats
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="yearly-goals">
+                            <span class="nav-icon">🎯</span>
+                            Goals
+                        </a>
+                    </li>
                 </ul>
             </nav>
-        </aside>
+        </aside>        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Desktop Page Header -->
+            <header class="app-header hidden md:block">
+                <div class="header-content">
+                    <div>
+                        <div class="header-title" id="page-title">Schedulez Dashboard</div>
+                        <div class="header-subtitle" id="page-subtitle">Your smart home management overview</div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button class="btn btn-primary btn-sm" onclick="openEventModal()" title="Add New Event">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                            </svg>
+                            Add Event
+                        </button>
+                    </div>
+                </div>
+            </header>
 
-        <!-- Main Content -->
-        <main class="main-content">            <!-- Dashboard Page -->            <div id="dashboard" class="page active">
+            <!-- Dashboard Page --><div id="dashboard" class="page active">
                 <div class="page-header">
                     <h1 class="page-title">Schedulez Dashboard</h1>
                     <p class="page-subtitle">Your smart home management overview</p>
-                </div>
-
-                <!-- Statistics Cards Grid -->
-                <div class="dashboard-cards-grid">
-                    <div class="stat-card">
-                        <div class="card-icon">
+                </div>                <!-- Statistics Cards Grid -->
+                <div class="grid-stats">
+                    <div class="stat-card clickable" onclick="showAnalyticsPage('total-tasks')">
+                        <div class="stat-icon text-blue-600">
                             <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
                                 <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
                             </svg>
                         </div>
-                        <div class="card-content">
-                            <span class="stat-number" id="total-events">0</span>
-                            <div class="stat-label">Total Tasks</div>
-                        </div>
+                        <div class="stat-value" id="total-events">0</div>
+                        <div class="stat-label">Total Tasks</div>
+                        <div class="text-xs text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">👆 Click for details</div>
                     </div>
                     
-                    <div class="stat-card">
-                        <div class="card-icon">
+                    <div class="stat-card clickable group" onclick="showAnalyticsPage('daily-analytics')">
+                        <div class="stat-icon text-amber-600">
                             <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
                                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                             </svg>
                         </div>
-                        <div class="card-content">
-                            <span class="stat-number" id="daily-completed-count">0</span>
-                            <div class="stat-label">Daily Completed</div>
-                        </div>
+                        <div class="stat-value" id="daily-completed-count">0</div>
+                        <div class="stat-label">Daily Completed</div>
+                        <div class="text-xs text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">👆 Click for analytics</div>
                     </div>
                     
-                    <div class="stat-card">
-                        <div class="card-icon">
+                    <div class="stat-card clickable group" onclick="showAnalyticsPage('weekly-analytics')">
+                        <div class="stat-icon text-emerald-600">
                             <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
                                 <path d="M9 11H7v6h2v-6zm4 0h-2v6h2v-6zm4 0h-2v6h2v-6zM19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
                             </svg>
                         </div>
-                        <div class="card-content">
-                            <span class="stat-number" id="weekly-completed-count">0</span>
-                            <div class="stat-label">Weekly Progress</div>
-                        </div>
+                        <div class="stat-value" id="weekly-completed-count">0</div>
+                        <div class="stat-label">Weekly Progress</div>
+                        <div class="text-xs text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">👆 Click for analytics</div>
                     </div>
-                    
-                    <div class="stat-card">
-                        <div class="card-icon">
+                      <div class="stat-card clickable group" onclick="showAnalyticsPage('monthly-analytics')">
+                        <div class="stat-icon text-purple-600">
                             <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
                                 <path d="M22 16v-2l-8.5-5V3.5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5V9L2 14v2l8.5-2.5V19L8 20.5V22l4-1 4 1v-1.5L13.5 19v-5.5L22 16z"/>
                             </svg>
                         </div>
-                        <div class="card-content">
-                            <span class="stat-number" id="monthly-completed-count">0</span>
-                            <div class="stat-label">Monthly Goals</div>
-                        </div>
+                        <div class="stat-value" id="monthly-completed-count">0</div>
+                        <div class="stat-label">Monthly Goals</div>
+                        <div class="text-xs text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">👆 Click for analytics</div>
                     </div>
-                </div>
-
-                <!-- Progress Tracking Section -->
-                <div class="progress-stats">
-                    <h3>🎯 Task Completion Progress</h3>                    <div class="progress-container">
-                        <div class="progress-item">
-                            <label>Daily Tasks</label>
-                            <div id="daily-progress" class="progress-bar">
-                                <div class="progress-fill"></div>
-                                <span class="progress-text">0/0 (0%)</span>
-                            </div>
-                        </div>
-                        <div class="progress-item">
-                            <label>Weekly Tasks</label>
-                            <div id="weekly-progress" class="progress-bar">
-                                <div class="progress-fill"></div>
-                                <span class="progress-text">0/0 (0%)</span>
-                            </div>
-                        </div>
-                        <div class="progress-item">
-                            <label>Monthly Tasks</label>
-                            <div id="monthly-progress" class="progress-bar">
-                                <div class="progress-fill"></div>
-                                <span class="progress-text">0/0 (0%)</span>
-                            </div>
-                        </div>
-                        <div class="progress-item">
-                            <label>Overall Progress</label>
-                            <div id="overall-progress" class="progress-bar">
-                                <div class="progress-fill"></div>
-                                <span class="progress-text">0/0 (0%)</span>
-                            </div>
-                        </div>
+                </div>                <!-- Progress Tracking Section -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="text-lg font-semibold text-slate-800">🎯 Task Completion Progress</h3>
                     </div>
-                    <div id="achievements" class="achievements-container"></div>
-                </div>
-
-                <div class="schedule-container">
-                    <h2 class="section-title">Today's Overview</h2>
-                    <div id="today-schedule">
-                        <!-- Today's schedule will be populated here -->
+                    <div class="card-body">
+                        <div class="space-y-6">
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <label class="form-label mb-0">Daily Tasks</label>
+                                    <span id="daily-progress-text" class="text-sm text-slate-600">0/0 (0%)</span>
+                                </div>                                <div class="progress-bar">
+                                    <div id="daily-progress-fill" class="progress-fill w-0"></div>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <label class="form-label mb-0">Weekly Tasks</label>
+                                    <span id="weekly-progress-text" class="text-sm text-slate-600">0/0 (0%)</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div id="weekly-progress-fill" class="progress-fill w-0"></div>
+                                </div>
+                            </div>                            <div class="space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <label class="form-label mb-0">Monthly Tasks</label>
+                                    <span id="monthly-progress-text" class="text-sm text-slate-600">0/0 (0%)</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div id="monthly-progress-fill" class="progress-fill w-0"></div>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <label class="form-label mb-0">Overall Progress</label>
+                                    <span id="overall-progress-text" class="text-sm text-slate-600">0/0 (0%)</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div id="overall-progress-fill" class="progress-fill w-0"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="achievements" class="mt-6 pt-6 border-t border-slate-200"></div>
+                    </div>
+                </div>                <div class="card">
+                    <div class="card-header">
+                        <h2 class="text-xl font-semibold text-slate-800">Today's Overview</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="today-schedule">
+                            <!-- Today's schedule will be populated here -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -193,11 +241,11 @@
                 <div class="page-header">
                     <h1 class="page-title">Daily Schedule</h1>
                     <p class="page-subtitle">Your complete daily routine</p>
-                </div>
-
-                <div class="schedule-container">
-                    <div id="daily-schedule">
-                        <!-- Daily schedule content -->
+                </div>                <div class="card">
+                    <div class="card-body">
+                        <div id="daily-schedule">
+                            <!-- Daily schedule content -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -231,44 +279,90 @@
                 <div class="page-header">
                     <h1 class="page-title">Manage Events</h1>
                     <p class="page-subtitle">Create, edit, and organize your schedule</p>
+                </div>                <!-- Data Management Section -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="text-lg font-semibold text-slate-800">🔧 Advanced Features</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="flex flex-wrap gap-3">
+                            <button class="btn btn-success" onclick="exportData()" title="Export your schedule as JSON backup">
+                                📤 Export Data
+                            </button>
+                            <button class="btn btn-primary" onclick="importData()" title="Import schedule from JSON backup">                            📥 Import Data
+                            </button>
+                            <button class="btn btn-outline" onclick="resetToDefaults()" title="Reset to original default schedule">
+                                🔄 Reset to Defaults
+                            </button>
+                        </div>
+                        <div class="mt-4">
+                            <small class="text-sm text-slate-600">
+                                💡 <strong>Drag and Drop:</strong> You can drag tasks by the ⋮⋮ handle to reorder them. Times will automatically adjust!
+                            </small>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Data Management Section -->
-                <div class="data-management-section">
-                    <h3>🔧 Advanced Features</h3>
-                    <div class="data-actions">
-                        <button class="btn btn-success" onclick="exportData()" title="Export your schedule as JSON backup">
-                            📤 Export Data
-                        </button>
-                        <button class="btn btn-primary" onclick="importData()" title="Import schedule from JSON backup">
-                            📥 Import Data
-                        </button>
-                        <button class="btn btn-warning" onclick="resetToDefaults()" title="Reset to original default schedule">
-                            🔄 Reset to Defaults
-                        </button>
-                    </div>                    <small class="help-text">
-                        💡 <strong>Drag and Drop:</strong> You can drag tasks by the ⋮⋮ handle to reorder them. Times will automatically adjust!
-                    </small>
-                </div>                <div class="schedule-container">
-                    <!-- Search Section -->                    <div class="search-filter-section">
-                        <input type="text" id="search-input" name="search" class="search-input" 
-                               placeholder="Search events by title, description, or category..."
-                               onkeyup="searchEvents(this.value)">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-xl font-semibold text-slate-800">All Events</h2>
+                        </div>
                     </div>
-                    
-                    <div class="section-header">
-                        <h2 class="section-title">All Events</h2>
-                        <button class="btn btn-primary" onclick="openEventModal()">
-                            <span>+</span> Add New Event
-                        </button>
-                    </div>
-                    <div id="events-list">
-                        <!-- Events list will be populated here -->
+                    <div class="card-body">
+                        <!-- Search Section -->
+                        <div class="mb-6">
+                            <input type="text" id="search-input" name="search" class="form-input" 
+                                   placeholder="Search events by title, description, or category..."
+                                   onkeyup="searchEvents(this.value)">
+                        </div>
+                        
+                        <div id="events-list">
+                            <!-- Events list will be populated here -->
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Analytics & Reports Page -->
+            <div id="analytics" class="page">
+                <div class="page-header">
+                    <h1 class="page-title">📊 Analytics & Reports</h1>
+                    <p class="page-subtitle">Comprehensive insights into your productivity and progress</p>
+                </div>
+                
+                <div id="analytics-content">
+                    <!-- Analytics content will be dynamically populated -->
+                    <div class="loading-analytics">
+                        <div class="loading-spinner"></div>
+                        <p>Loading analytics...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yearly Goals Page -->
+            <div id="yearly-goals" class="page">
+                <div class="page-header">
+                    <h1 class="page-title">🎯 Long-term Planning</h1>
+                    <p class="page-subtitle">Set and track your 1-year, 5-year, and 10-year goals</p>
+                </div>
+                
+                <div id="yearly-goals-content">
+                    <!-- Yearly goals content will be dynamically populated -->
+                    <div class="loading-goals">
+                        <div class="loading-spinner"></div>
+                        <p>Loading goals...</p>
+                    </div>
+                </div>            </div>
         </main>
-    </div>    <!-- Hidden File Input for Import -->
+
+        <!-- Floating Action Button -->
+        <button class="fab" onclick="openEventModal()" title="Add New Event">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+        </button>
+    </div><!-- Hidden File Input for Import -->
     <label for="import-file" class="visually-hidden">Import JSON file</label>
     <input type="file" id="import-file" name="import-file" accept=".json" class="hidden-file-input" aria-label="Select JSON file to import schedule data">
 
@@ -347,6 +441,7 @@
         </div>
     </div>    <!-- JavaScript -->
     <script src="src/js/script.js"></script>
+    <script src="src/js/animations.js"></script>
 </body>
 </html>
 

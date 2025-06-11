@@ -1,0 +1,12 @@
+# Files to ignore for Prettier formatting
+node_modules/
+dist/
+coverage/
+.nyc_output/
+*.min.js
+*.min.css
+package-lock.json
+*.log
+.git/
+.husky/
+reports/

@@ -93,21 +93,24 @@ export function updateProgressStats() {
 
 // Update individual progress bar
 export function updateProgressBar(id, completed, total) {
-    const progressBar = document.getElementById(id);
-    if (!progressBar) return;
+    // New structure with separate fill and text elements
+    const progressFill = document.getElementById(`${id}-fill`);
+    const progressText = document.getElementById(`${id}-text`);
     
-    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-    const progressFill = progressBar.querySelector('.progress-fill');
-    const progressText = progressBar.querySelector('.progress-text');
-    
-    if (progressFill) {
+    if (progressFill && progressText) {
+        const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
         progressFill.style.width = `${percentage}%`;
         progressFill.setAttribute('aria-valuenow', percentage);
-    }
-    
-    if (progressText) {
         progressText.textContent = `${completed}/${total} (${percentage}%)`;
+        
+        // Add completion classes for styling
+        const progressBar = progressFill.closest('.progress-bar');
+        if (progressBar) {
+            progressBar.classList.toggle('progress-complete', percentage === 100);
+            progressBar.classList.toggle('progress-high', percentage >= 80 && percentage < 100);
+        }
     }
+}
     
     // Update ARIA attributes
     progressBar.setAttribute('aria-valuemin', '0');
@@ -161,4 +164,121 @@ export function updateAchievements(dailyCompleted, dailyTotal, weeklyCompleted, 
     } else {
         achievementsContainer.innerHTML = '<div class="no-achievements">Complete tasks to earn achievements!</div>';
     }
+}
+
+// Enhanced dashboard integration with analytics
+export function updateDashboardWithAnalytics() {
+    // Update basic dashboard stats first
+    updateDashboardStats();
+    
+    // Update with analytics data if available
+    if (typeof window.recordTaskCompletion === 'function') {
+        updateAnalyticsIntegratedStats();
+    }
+}
+
+// Update dashboard stats with analytics integration
+function updateAnalyticsIntegratedStats() {
+    const today = new Date().toISOString().split('T')[0];
+    const completions = JSON.parse(localStorage.getItem('schedulez_daily_completions') || '{}');
+    const todayCompletions = completions[today] || {};
+    
+    // Update total events count
+    const totalEventsElement = document.getElementById('total-events');
+    if (totalEventsElement && typeof events !== 'undefined') {
+        totalEventsElement.textContent = events.length || 0;
+    }
+    
+    // Calculate today's completion percentage
+    const dailyTasks = events ? events.filter(e => e.schedule === 'daily') : [];
+    const completedCount = Object.keys(todayCompletions).length;
+    const totalDaily = dailyTasks.length;
+    const completionPercentage = totalDaily > 0 ? Math.round((completedCount / totalDaily) * 100) : 0;
+    
+    // Update daily completed with percentage
+    const dailyCompletedElement = document.getElementById('daily-completed-count');
+    if (dailyCompletedElement) {
+        dailyCompletedElement.innerHTML = `
+            <span class="completion-number">${completedCount}</span>
+            <small class="completion-percentage">${completionPercentage}%</small>
+        `;
+    }
+    
+    // Update weekly progress with analytics
+    updateWeeklyAnalyticsStats();
+    
+    // Update monthly goals with analytics  
+    updateMonthlyAnalyticsStats();
+}
+
+function updateWeeklyAnalyticsStats() {
+    const weeklyCompletedElement = document.getElementById('weekly-completed-count');
+    if (weeklyCompletedElement) {
+        // Calculate weekly progress from analytics data
+        const weeklyProgress = calculateWeeklyProgressFromAnalytics();
+        weeklyCompletedElement.innerHTML = `
+            <span class="completion-number">${weeklyProgress.completed}</span>
+            <small class="completion-percentage">${weeklyProgress.percentage}%</small>
+        `;
+    }
+}
+
+function updateMonthlyAnalyticsStats() {
+    const monthlyCompletedElement = document.getElementById('monthly-completed-count');
+    if (monthlyCompletedElement) {
+        // Calculate monthly progress from analytics data
+        const monthlyProgress = calculateMonthlyProgressFromAnalytics();
+        monthlyCompletedElement.innerHTML = `
+            <span class="completion-number">${monthlyProgress.completed}</span>
+            <small class="completion-percentage">${monthlyProgress.percentage}%</small>
+        `;
+    }
+}
+
+function calculateWeeklyProgressFromAnalytics() {
+    // Get last 7 days of completion data
+    const completions = JSON.parse(localStorage.getItem('schedulez_daily_completions') || '{}');
+    let totalCompleted = 0;
+    let totalPossible = 0;
+    
+    for (let i = 0; i < 7; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dateKey = date.toISOString().split('T')[0];
+        
+        const dayCompletions = completions[dateKey] || {};
+        totalCompleted += Object.keys(dayCompletions).length;
+        
+        // Assume similar number of daily tasks each day
+        const dailyTasks = events ? events.filter(e => e.schedule === 'daily').length : 0;
+        totalPossible += dailyTasks;
+    }
+    
+    const percentage = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
+    return { completed: totalCompleted, total: totalPossible, percentage };
+}
+
+function calculateMonthlyProgressFromAnalytics() {
+    // Get current month's completion data
+    const completions = JSON.parse(localStorage.getItem('schedulez_daily_completions') || '{}');
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    
+    let monthlyCompleted = 0;
+    let monthlyPossible = 0;
+    
+    // Count completions for current month
+    Object.keys(completions).forEach(dateKey => {
+        const date = new Date(dateKey);
+        if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
+            monthlyCompleted += Object.keys(completions[dateKey]).length;
+            
+            // Add to possible count
+            const dailyTasks = events ? events.filter(e => e.schedule === 'daily').length : 0;
+            monthlyPossible += dailyTasks;
+        }
+    });
+    
+    const percentage = monthlyPossible > 0 ? Math.round((monthlyCompleted / monthlyPossible) * 100) : 0;
+    return { completed: monthlyCompleted, total: monthlyPossible, percentage };
 }

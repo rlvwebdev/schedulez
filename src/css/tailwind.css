@@ -1,0 +1,673 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom components and styles */
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-700 font-sans antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-slate-800 font-semibold;
+  }
+}
+
+@layer components {
+  /* Button Components */
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-primary {
+    @apply bg-blue-600 text-white border-blue-600 hover:bg-blue-700 focus:ring-blue-500;
+  }
+  
+  .btn-secondary {
+    @apply bg-slate-600 text-white border-slate-600 hover:bg-slate-700 focus:ring-slate-500;
+  }
+  
+  .btn-success {
+    @apply bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500;
+  }
+  
+  .btn-danger {
+    @apply bg-red-600 text-white border-red-600 hover:bg-red-700 focus:ring-red-500;
+  }
+  
+  .btn-outline {
+    @apply bg-transparent border-slate-300 text-slate-700 hover:bg-slate-50 focus:ring-slate-500;
+  }
+  
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+  
+  .btn-lg {
+    @apply px-6 py-3 text-base;
+  }
+  
+  /* Form Components */
+  .form-input {
+    @apply block w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-700 placeholder-slate-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+  }
+  
+  .form-select {
+    @apply block w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-700 bg-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+  }
+    .form-textarea {
+    @apply block w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-700 placeholder-slate-400 resize-y transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+  }
+  
+  .form-checkbox {
+    @apply h-4 w-4 text-blue-600 border-slate-300 rounded transition-colors duration-200 focus:ring-2 focus:ring-blue-500;
+  }
+  
+  .form-label {
+    @apply block text-sm font-medium text-slate-700 mb-1;
+  }
+  
+  /* Card Components */
+  .card {
+    @apply bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden;
+  }
+  
+  .card-header {
+    @apply px-6 py-4 border-b border-slate-200 bg-slate-50;
+  }
+  
+  .card-body {
+    @apply px-6 py-4;
+  }
+  
+  .card-footer {
+    @apply px-6 py-4 border-t border-slate-200 bg-slate-50;
+  }
+  
+  /* Task Card Components */
+  .task-card {
+    @apply bg-white rounded-lg shadow-sm border border-slate-200 p-4 hover:shadow-md transition-shadow duration-200;
+  }
+  
+  .task-card.completed {
+    @apply bg-emerald-50 border-emerald-200;
+  }
+  
+  .task-card-header {
+    @apply flex items-center justify-between mb-3;
+  }
+  
+  .task-card-title {
+    @apply text-sm font-medium text-slate-800 flex-1;
+  }
+  
+  .task-card-time {
+    @apply text-xs text-slate-500 ml-2;
+  }
+  
+  .task-card-checkbox {
+    @apply form-checkbox mr-3;
+  }
+    /* Navigation Components */
+  .nav-link {
+    @apply flex items-center px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-all duration-200;
+  }
+  
+  .nav-link.active {
+    @apply text-white bg-blue-600;
+  }
+  
+  .nav-icon {
+    @apply w-5 h-5 mr-3;
+  }
+
+  /* Header Navigation Components */
+  .app-header {
+    @apply bg-white border-b border-slate-200 shadow-sm;
+  }
+  
+  .header-content {
+    @apply flex items-center justify-between px-4 py-3;
+  }
+  
+  .header-title {
+    @apply text-lg font-semibold text-slate-800;
+  }
+  
+  .header-subtitle {
+    @apply text-sm text-slate-600;
+  }
+    /* Mobile Navigation Bar */
+  .mobile-nav-bar {
+    @apply bg-slate-800 text-white px-4 py-3 flex items-center justify-between;
+  }
+  
+  .mobile-nav-title {
+    @apply text-lg font-semibold;
+  }
+  
+  .mobile-nav-subtitle {
+    @apply text-sm text-slate-300;
+  }
+
+  /* Enhanced Mobile/Desktop Navigation Delineation */
+  .main-content {
+    @apply pt-16; /* Space for mobile header */
+  }
+  
+  @media (min-width: 768px) {
+    .main-content {
+      @apply pt-0; /* Remove mobile header space on desktop */
+    }
+    
+    .app-header {
+      @apply sticky top-0 z-40 backdrop-blur-sm bg-white/95;
+    }
+  }
+  
+  /* Mobile FAB positioning adjustment for header */
+  @media (max-width: 767px) {
+    .fab {
+      @apply bottom-20; /* Move up to avoid mobile header area */
+    }
+  }
+  
+  /* Floating Action Button */
+  .fab {
+    @apply fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center z-50;
+  }
+  
+  .fab:hover {
+    @apply scale-110 shadow-xl;
+  }
+  
+  /* Stats Cards */
+  .stat-card {
+    @apply bg-white rounded-lg shadow-sm border border-slate-200 p-6 hover:shadow-md transition-all duration-200 cursor-pointer;
+  }
+  
+  .stat-card.clickable:hover {
+    @apply scale-105 shadow-lg;
+  }
+  
+  .stat-icon {
+    @apply text-3xl mb-3;
+  }
+  
+  .stat-value {
+    @apply text-2xl font-bold text-slate-800 mb-1;
+  }
+  
+  .stat-label {
+    @apply text-sm text-slate-600 mb-3;
+  }
+  
+  /* Progress Components */
+  .progress-bar {
+    @apply w-full bg-slate-200 rounded-full h-2 overflow-hidden;
+  }
+  
+  .progress-fill {
+    @apply h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500 ease-out;
+  }
+  
+  /* Enhanced Progress Bar Styles */
+  .progress-bar.progress-complete .progress-fill {
+    @apply bg-gradient-to-r from-emerald-500 to-emerald-600;
+  }
+  
+  .progress-bar.progress-high .progress-fill {
+    @apply bg-gradient-to-r from-amber-500 to-amber-600;
+  }
+  
+  /* Event Card Components */
+  .event-card {
+    @apply bg-white rounded-lg shadow-sm border border-slate-200 p-4 hover:shadow-md transition-all duration-200 relative overflow-hidden;
+  }
+  
+  .event-card.completed {
+    @apply bg-emerald-50 border-emerald-200;
+  }
+  
+  .event-card-header {
+    @apply flex items-center justify-between mb-3;
+  }
+  
+  .event-card-title {
+    @apply text-sm font-medium text-slate-800 flex-1;
+  }
+  
+  .event-card-time {
+    @apply text-xs text-slate-500 ml-2;
+  }
+  
+  .event-card-checkbox {
+    @apply form-checkbox mr-3 transition-all duration-200;
+    position: relative;
+  }
+  
+  .event-card-checkbox:checked {
+    @apply text-emerald-600 border-emerald-600;
+    animation: checkboxPop 0.2s ease-out;
+  }
+  
+  .event-card-checkbox:checked::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border: 2px solid rgba(16, 185, 129, 0.3);
+    border-radius: 0.25rem;
+    animation: checkboxGlow 0.3s ease-out;
+  }
+  
+  .event-card-title-time {
+    @apply flex-1;
+  }
+  
+  .event-card-completion {
+    @apply flex items-center;
+  }
+  
+  .event-card-body {
+    @apply mt-3 pt-3 border-t border-slate-100;
+  }
+  
+  .event-card-description {
+    @apply text-sm text-slate-600 mb-2;
+  }
+  
+  .event-card-tags {
+    @apply flex flex-wrap gap-1;
+  }
+  
+  .event-card-tag {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .tag-personal { @apply bg-blue-100 text-blue-800; }
+  .tag-dogs { @apply bg-amber-100 text-amber-800; }
+  .tag-cleaning { @apply bg-emerald-100 text-emerald-800; }
+  .tag-kitchen { @apply bg-orange-100 text-orange-800; }
+  .tag-development { @apply bg-purple-100 text-purple-800; }
+  .tag-maintenance { @apply bg-red-100 text-red-800; }
+  .tag-daily { @apply bg-slate-100 text-slate-800; }
+  .tag-weekly { @apply bg-slate-100 text-slate-800; }
+  .tag-monthly { @apply bg-slate-100 text-slate-800; }
+  .tag-monday, .tag-tuesday, .tag-wednesday, .tag-thursday, .tag-friday, .tag-saturday, .tag-sunday { @apply bg-indigo-100 text-indigo-800; }
+  .tag-first, .tag-second, .tag-third, .tag-fourth { @apply bg-violet-100 text-violet-800; }
+  
+  /* Dropdown Components */
+  .event-card-dropdown {
+    @apply relative;
+  }
+  
+  .event-card-dropdown-trigger {
+    @apply p-1 text-slate-400 hover:text-slate-600 rounded transition-colors duration-200;
+  }
+  
+  .event-card-dropdown-menu {
+    @apply absolute right-0 top-full mt-1 w-32 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-10 opacity-0 scale-95 transform transition-all duration-200 pointer-events-none;
+  }
+  
+  .event-card-dropdown.open .event-card-dropdown-menu {
+    @apply opacity-100 scale-100 pointer-events-auto;
+  }
+  
+  .event-card-dropdown-item {
+    @apply w-full px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-colors duration-200;
+  }
+  
+  .event-card-dropdown-item.danger {
+    @apply text-red-600 hover:bg-red-50;
+  }
+  
+  /* Modal Components */
+  .modal {
+    @apply fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm;
+    display: none;
+  }
+  
+  .modal-content {
+    @apply bg-white rounded-lg shadow-xl max-w-md w-full max-h-full overflow-auto;
+  }
+  
+  .modal-header {
+    @apply flex items-center justify-between p-6 border-b border-slate-200;
+  }
+  
+  .modal-title {
+    @apply text-lg font-semibold text-slate-800;
+  }
+  
+  .close-btn {
+    @apply text-slate-400 hover:text-slate-600 text-2xl leading-none transition-colors duration-200;
+  }
+  
+  .form-group {
+    @apply mb-4;
+  }
+  
+  .form-actions {
+    @apply flex justify-end gap-3 mt-6;
+  }
+  
+  /* Tasks Grid */
+  .tasks-grid {
+    @apply grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3;
+  }
+  
+  /* Achievement Styles */
+  .achievement-badge {
+    @apply inline-flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg text-sm font-medium shadow-lg;
+  }
+  
+  .achievement-icon {
+    @apply text-lg;
+  }
+  
+  .achievement-title {
+    @apply font-medium;
+  }
+  
+  .no-achievements {
+    @apply text-slate-500 text-center py-4;
+  }
+  
+  /* Animation Classes */
+  .animate-fade-in {
+    @apply opacity-0 translate-y-4;
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+  
+  .animate-slide-in {
+    @apply opacity-0 -translate-x-4;
+    animation: slideIn 0.3s ease-out forwards;
+  }
+  
+  .animate-scale-in {
+    @apply opacity-0 scale-95;
+    animation: scaleIn 0.3s ease-out forwards;
+  }
+  
+  /* Hover Effects */
+  .hover-lift {
+    @apply transition-transform duration-200 hover:-translate-y-1;
+  }
+  
+  .hover-glow {
+    @apply transition-shadow duration-200 hover:shadow-lg;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
+  }
+  
+  .shadow-category-personal { @apply shadow-blue-500/20; }
+  .shadow-category-dogs { @apply shadow-amber-500/20; }
+  .shadow-category-cleaning { @apply shadow-emerald-500/20; }
+  .shadow-category-kitchen { @apply shadow-orange-500/20; }
+  .shadow-category-development { @apply shadow-purple-500/20; }
+  .shadow-category-maintenance { @apply shadow-red-500/20; }
+}
+
+/* Enhanced checkbox animations and states */
+.event-card-checkbox {
+  @apply form-checkbox mr-3 transition-all duration-200;
+  position: relative;
+}
+
+.event-card-checkbox:checked {
+  @apply text-emerald-600 border-emerald-600;
+  animation: checkboxPop 0.2s ease-out;
+}
+
+.event-card-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid rgba(16, 185, 129, 0.3);
+  border-radius: 0.25rem;
+  animation: checkboxGlow 0.3s ease-out;
+}
+
+/* Completion burst animation */
+@keyframes checkboxPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@keyframes checkboxGlow {
+  0% { 
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+
+/* Enhanced completed event card styling */
+.event-card.completed {
+  @apply border-emerald-200 bg-emerald-50;
+  position: relative;
+  overflow: hidden;
+}
+
+.event-card.completed::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, #10b981, #059669);
+  animation: completedSlideIn 0.3s ease-out;
+}
+
+.event-card.completed .event-card-title {
+  @apply text-emerald-800;
+  position: relative;
+}
+
+.event-card.completed .event-card-title::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.5;
+  animation: strikethrough 0.3s ease-out;
+}
+
+@keyframes completedSlideIn {
+  0% {
+    height: 0;
+  }
+  100% {
+    height: 100%;
+  }
+}
+
+@keyframes strikethrough {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+/* Progress bar enhancements */
+.progress-bar {
+  @apply h-2 w-full overflow-hidden rounded-full bg-slate-200;
+  position: relative;
+}
+
+.progress-fill {
+  @apply h-full bg-gradient-to-r from-blue-600 to-blue-500 transition-all duration-500;
+  transform-origin: left center;
+}
+
+.progress-bar.progress-complete .progress-fill {
+  @apply bg-gradient-to-r from-emerald-600 to-emerald-500;
+  animation: progressComplete 0.6s ease-out;
+}
+
+.progress-bar.progress-high .progress-fill {
+  @apply bg-gradient-to-r from-amber-500 to-orange-500;
+}
+
+@keyframes progressComplete {
+  0% { 
+    transform: scaleX(0.95);
+  }
+  50% {
+    transform: scaleX(1.02);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+/* Floating Action Button enhancements */
+.fab {
+  @apply fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition-all duration-200;
+  backdrop-filter: blur(10px);
+}
+
+.fab:hover {
+  @apply bg-blue-700 scale-110 shadow-xl;
+  transform: scale(1.1) rotate(90deg);
+}
+
+.fab:active {
+  @apply scale-95;
+  transform: scale(0.95) rotate(180deg);
+}
+
+/* Card hover animations */
+.stat-card.clickable:hover {
+  @apply scale-105 shadow-lg;
+  animation: cardFloat 0.3s ease-out;
+}
+
+.event-card:hover {
+  @apply shadow-md;
+  transform: translateY(-1px);
+}
+
+@keyframes cardFloat {
+  0% { 
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-2px) scale(1.02);
+  }
+  100% {
+    transform: translateY(-1px) scale(1.05);
+  }
+}
+
+/* Page transition animations */
+.page {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.page:not(.active) {
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+}
+
+.page.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Modal animations */
+.modal {
+  @apply fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4;
+  backdrop-filter: blur(4px);
+  animation: modalBackdropFadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  animation: modalSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalBackdropFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Notification animations */
+.notification {
+  animation: notificationSlideIn 0.3s ease-out;
+}
+
+@keyframes notificationSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Accessibility: Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .fab:hover {
+    transform: none;
+  }
+  
+  .event-card.completed::before {
+    animation: none;
+  }
+  
+  .event-card.completed .event-card-title::after {
+    animation: none;
+    width: 100%;
+  }
+}

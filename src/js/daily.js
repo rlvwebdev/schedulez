@@ -1,32 +1,47 @@
 // Daily Schedule Module
 // This module handles all daily schedule related functionality
 
+// Import utility functions (these will be available globally when script.js loads)
+// formatTime, capitalizeFirst, isTaskCompleted, escapeHTML, events array
+
 // Render daily schedule view
 export function renderDailySchedule() {
     const dailyEvents = events.filter(e => e.schedule === 'daily').sort((a, b) => a.time.localeCompare(b.time));
     const container = document.getElementById('daily-schedule');
     
     if (!container) return;
-    
-    container.innerHTML = dailyEvents.map((event, index) => `
-        <div class="time-block sortable-item ${isTaskCompleted(event) ? 'completed' : ''}" data-event-id="${event.id}" data-index="${index}">
-            <div class="time">
-                <span class="drag-handle" title="Drag to reorder">⋮⋮</span>
-                ${formatTime(event.time)}
+      container.innerHTML = dailyEvents.map((event, index) => `
+        <div class="event-card category-${event.category} ${isTaskCompleted(event) ? 'completed' : ''}" data-event-id="${event.id}" data-index="${index}">
+            <div class="event-card-header category-${event.category}">
+                <div class="event-card-drag-handle" title="Drag to reorder">⋮⋮</div>
+                <div class="event-card-title-time">
+                    <h3 class="event-card-title">${escapeHTML(event.title)}</h3>
+                    <div class="event-card-time">${formatTime(event.time)}</div>
+                </div>
+                <div class="event-card-completion">
+                    <input type="checkbox" 
+                           class="event-card-checkbox" 
+                           ${isTaskCompleted(event) ? 'checked' : ''} 
+                           onchange="toggleTaskCompletion(${event.id})"
+                           title="Mark as ${isTaskCompleted(event) ? 'incomplete' : 'completed'}">
+                </div>
             </div>
-            <div class="task">
-                <span class="task-type ${event.category}">${capitalizeFirst(event.category)}</span>
-                ${event.title}
-                ${event.description ? `<br><small class="event-description">${event.description}</small>` : ''}
-            </div>
-            <div class="task-actions">
-                <label class="completion-checkbox" title="Mark as ${isTaskCompleted(event) ? 'incomplete' : 'completed'}">
-                    <input type="checkbox" ${isTaskCompleted(event) ? 'checked' : ''} onchange="toggleTaskCompletion(${event.id})">
-                    <span class="checkmark">${isTaskCompleted(event) ? '✅' : '☐'}</span>
-                </label>
-                <button class="btn btn-warning btn-sm" onclick="openEventModal(${event.id})" title="Edit">✏️</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteEvent(${event.id})" title="Delete">🗑️</button>
-            </div>
+            ${event.description ? `
+                <div class="event-card-body">
+                    <div class="event-card-description">${escapeHTML(event.description)}</div>
+                    <div class="event-card-tags">
+                        <span class="event-card-tag tag-${event.category}">${capitalizeFirst(event.category)}</span>
+                        <span class="event-card-tag tag-${event.schedule}">${capitalizeFirst(event.schedule)}</span>
+                    </div>
+                </div>
+            ` : `
+                <div class="event-card-body">
+                    <div class="event-card-tags">
+                        <span class="event-card-tag tag-${event.category}">${capitalizeFirst(event.category)}</span>
+                        <span class="event-card-tag tag-${event.schedule}">${capitalizeFirst(event.schedule)}</span>
+                    </div>
+                </div>
+            `}
         </div>
     `).join('');
     

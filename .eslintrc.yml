@@ -1,0 +1,98 @@
+# ESLint Configuration
+root: true
+
+env:
+  browser: true
+  es2021: true
+  jest: true
+  node: false
+
+extends:
+  - eslint:recommended
+  - prettier
+
+parserOptions:
+  ecmaVersion: latest
+  sourceType: module
+
+rules:
+  # Error prevention
+  no-console: warn
+  no-unused-vars: off
+  no-undef: off
+  no-unreachable: error
+  no-redeclare: off
+  no-prototype-builtins: off
+  
+  # Best practices
+  prefer-const: error
+  no-var: error
+  eqeqeq: [error, always]
+  curly: [error, all]
+  dot-notation: error
+  
+  # Style (handled by Prettier mostly)
+  indent: [error, 2]
+  quotes: [error, single]
+  semi: [error, always]
+  
+  # Function rules
+  func-style: [error, declaration, { allowArrowFunctions: true }]
+  no-unused-expressions: error
+  
+  # Array and Object rules
+  no-array-constructor: error
+  object-shorthand: error
+  
+globals:
+  # Schedulez global variables
+  events: writable
+  editingEventId: writable
+  deferredPrompt: writable
+  
+  # Global functions
+  showNotification: readonly
+  renderAllViews: readonly
+  updateProgressStats: readonly
+  saveEvents: readonly
+  loadEvents: readonly
+  initializeApp: readonly
+  renderAnalytics: readonly
+  renderYearlyGoals: readonly
+  updateDashboardWithAnalytics: readonly
+  recordTaskCompletion: readonly
+  updatePageHeaders: readonly
+  handleOldEventListener: readonly
+  
+  # Event handlers
+  openEventModal: readonly
+  closeEventModal: readonly
+  saveEvent: readonly
+  editEvent: readonly
+  deleteEvent: readonly
+  toggleTaskCompletion: readonly
+  
+  # Navigation functions
+  showContent: readonly
+  updateActiveNav: readonly
+  navigateToAnalytics: readonly
+  navigateToYearlyGoals: readonly
+  
+  # Render functions
+  renderDailySchedule: readonly
+  renderWeeklyTasks: readonly
+  renderMonthlyTasks: readonly
+  renderManageEvents: readonly
+  renderTodaySchedule: readonly
+  updateDashboard: readonly
+  
+  # Utility functions
+  formatTime: readonly
+  capitalizeFirst: readonly
+  escapeHTML: readonly
+  sanitizeHTML: readonly
+  getStorageInfo: readonly
+  
+  # Mobile navigation
+  toggleMobileNav: readonly
+  closeMobileNav: readonly

@@ -1,0 +1,85 @@
+# Auto-assign PR reviewers and labels
+name: PR Automation
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  auto-assign:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Auto-assign reviewers
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { owner, repo } = context.repo;
+          const prNumber = context.payload.pull_request.number;
+          const author = context.payload.pull_request.user.login;
+          
+          // Define team members (replace with actual usernames)
+          const teamMembers = ['team-lead', 'senior-dev-1', 'senior-dev-2'];
+          const reviewers = teamMembers.filter(member => member !== author);
+          
+          // Assign reviewers (max 2)
+          if (reviewers.length > 0) {
+            await github.rest.pulls.requestReviewers({
+              owner,
+              repo,
+              pull_number: prNumber,
+              reviewers: reviewers.slice(0, 2)
+            });
+          }
+          
+    - name: Auto-label PR
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { owner, repo } = context.repo;
+          const prNumber = context.payload.pull_request.number;
+          const title = context.payload.pull_request.title.toLowerCase();
+          const branch = context.payload.pull_request.head.ref;
+          
+          let labels = [];
+          
+          // Label based on branch name
+          if (branch.startsWith('feature/')) {
+            labels.push('enhancement');
+          } else if (branch.startsWith('bugfix/')) {
+            labels.push('bug');
+          } else if (branch.startsWith('hotfix/')) {
+            labels.push('hotfix', 'urgent');
+          } else if (branch.startsWith('release/')) {
+            labels.push('release');
+          }
+          
+          // Label based on title
+          if (title.includes('docs')) {
+            labels.push('documentation');
+          }
+          if (title.includes('test')) {
+            labels.push('testing');
+          }
+          if (title.includes('refactor')) {
+            labels.push('refactoring');
+          }
+          
+          // Add size label based on files changed
+          const files = context.payload.pull_request.changed_files;
+          if (files <= 5) {
+            labels.push('size/small');
+          } else if (files <= 15) {
+            labels.push('size/medium');
+          } else {
+            labels.push('size/large');
+          }
+          
+          // Apply labels
+          if (labels.length > 0) {
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: prNumber,
+              labels
+            });
+          }

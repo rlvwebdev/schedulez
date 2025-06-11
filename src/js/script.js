@@ -112,7 +112,7 @@ function initializeDefaultEvents() {
         { id: 14, title: "Clean dinner dishes, wipe counters, prep kitchen for next day", time: "20:00", category: "kitchen", schedule: "daily", day: "", week: "", description: "" },
         { id: 15, title: "TMS Development (1.5 hours Mon-Fri)", time: "20:15", category: "development", schedule: "daily", day: "", week: "", description: "Code/work on Transportation Management System project" },
         { id: 16, title: "Final potty break for dogs", time: "21:45", category: "dogs", schedule: "daily", day: "", week: "", description: "" },
-        { id: 17, title: "Brief relaxation/wind down", time: "21:50", category: "personal", schedule: "daily", day: "", week: "", description: "" },
+        { id:17, title: "Brief relaxation/wind down", time: "21:50", category: "personal", schedule: "daily", day: "", week: "", description: "" },
         { id: 18, title: "Wind down routine, prepare for bed", time: "22:00", category: "personal", schedule: "daily", day: "", week: "", description: "" },
         { id: 19, title: "Bedtime", time: "22:15", category: "personal", schedule: "daily", day: "", week: "", description: "" },
 
@@ -1028,6 +1028,197 @@ function performSearch(query) {
     });
     
     searchResults.innerHTML = html;
+}
+
+// Utility functions
+function formatTime(time24) {
+    const [hours, minutes] = time24.split(':');
+    const hour12 = hours % 12 || 12;
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    return `${hour12}:${minutes} ${ampm}`;
+}
+
+function capitalizeFirst(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function isTaskCompleted(event) {
+    const today = new Date().toDateString();
+    
+    if (event.schedule === 'daily') {
+        return event.completedToday && event.lastCompleted === today;
+    } else {
+        return event.completed;
+    }
+}
+
+// Render functions
+function renderDailySchedule() {
+    const dailyEvents = events.filter(e => e.schedule === 'daily').sort((a, b) => a.time.localeCompare(b.time));
+    const container = document.getElementById('daily-schedule');
+    
+    if (!container) return;
+    
+    container.innerHTML = dailyEvents.map((event, index) => `
+        <div class="time-block sortable-item ${isTaskCompleted(event) ? 'completed' : ''}" data-event-id="${event.id}" data-index="${index}">
+            <div class="time">
+                <span class="drag-handle" title="Drag to reorder">⋮⋮</span>
+                ${formatTime(event.time)}
+            </div>
+            <div class="task">
+                <span class="task-type ${event.category}">${capitalizeFirst(event.category)}</span>
+                ${event.title}
+                ${event.description ? `<br><small class="event-description">${event.description}</small>` : ''}
+            </div>
+            <div class="task-actions">
+                <label class="completion-checkbox" title="Mark as ${isTaskCompleted(event) ? 'incomplete' : 'completed'}">
+                    <input type="checkbox" ${isTaskCompleted(event) ? 'checked' : ''} onchange="toggleTaskCompletion(${event.id})">
+                    <span class="checkmark">${isTaskCompleted(event) ? '✅' : '☐'}</span>
+                </label>
+                <button class="btn btn-warning btn-sm" onclick="openEventModal(${event.id})" title="Edit">✏️</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteEvent(${event.id})" title="Delete">🗑️</button>
+            </div>
+        </div>
+    `).join('');
+    
+    // Initialize drag and drop after rendering
+    setTimeout(() => initializeDragAndDrop(), 0);
+}
+
+function renderWeeklyTasks() {
+    const weekDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const container = document.getElementById('weekly-tasks');
+    
+    if (!container) return;
+    
+    container.innerHTML = weekDays.map(day => {
+        const dayEvents = events.filter(e => e.schedule === 'weekly' && e.day === day);
+        return `
+            <div class="task-card">
+                <h3>
+                    📅 ${capitalizeFirst(day)}
+                    <button class="btn btn-primary btn-sm" onclick="openEventModal()" title="Add Event">+</button>
+                </h3>
+                <div class="task-list-container sortable-container">
+                    ${dayEvents.map((event, index) => `
+                        <div class="time-block sortable-item ${isTaskCompleted(event) ? 'completed' : ''}" data-event-id="${event.id}" data-index="${index}">
+                            <div class="time">
+                                <span class="drag-handle" title="Drag to reorder">⋮⋮</span>
+                                ${formatTime(event.time)}
+                            </div>
+                            <div class="task">
+                                <span class="task-type ${event.category}">${capitalizeFirst(event.category)}</span>
+                                ${event.title}
+                                ${event.description ? `<br><small class="event-description">${event.description}</small>` : ''}
+                            </div>
+                            <div class="task-actions">
+                                <label class="completion-checkbox" title="Mark as ${isTaskCompleted(event) ? 'incomplete' : 'completed'}">
+                                    <input type="checkbox" ${isTaskCompleted(event) ? 'checked' : ''} onchange="toggleTaskCompletion(${event.id})">
+                                    <span class="checkmark">${isTaskCompleted(event) ? '✅' : '☐'}</span>
+                                </label>
+                                <button class="btn btn-warning btn-sm" onclick="openEventModal(${event.id})" title="Edit">✏️</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteEvent(${event.id})" title="Delete">🗑️</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    // Initialize drag and drop after rendering
+    setTimeout(() => initializeDragAndDrop(), 0);
+}
+
+function renderMonthlyTasks() {
+    const weeks = ['first', 'second', 'third', 'fourth'];
+    const container = document.getElementById('monthly-tasks');
+    
+    if (!container) return;
+    
+    container.innerHTML = weeks.map(week => {
+        const weekEvents = events.filter(e => e.schedule === 'monthly' && e.week === week);
+        return `
+            <div class="task-card">
+                <h3>
+                    🗓️ ${capitalizeFirst(week)} Week
+                    <button class="btn btn-primary btn-sm" onclick="openEventModal()" title="Add Event">+</button>
+                </h3>
+                <div class="task-list-container sortable-container">
+                    ${weekEvents.map((event, index) => `
+                        <div class="time-block sortable-item ${isTaskCompleted(event) ? 'completed' : ''}" data-event-id="${event.id}" data-index="${index}">
+                            <div class="time">
+                                <span class="drag-handle" title="Drag to reorder">⋮⋮</span>
+                                ${formatTime(event.time)}
+                            </div>
+                            <div class="task">
+                                <span class="task-type ${event.category}">${capitalizeFirst(event.category)}</span>
+                                ${event.title}
+                                ${event.description ? `<br><small class="event-description">${event.description}</small>` : ''}
+                            </div>
+                            <div class="task-actions">
+                                <label class="completion-checkbox" title="Mark as ${isTaskCompleted(event) ? 'incomplete' : 'completed'}">
+                                    <input type="checkbox" ${isTaskCompleted(event) ? 'checked' : ''} onchange="toggleTaskCompletion(${event.id})">
+                                    <span class="checkmark">${isTaskCompleted(event) ? '✅' : '☐'}</span>
+                                </label>
+                                <button class="btn btn-warning btn-sm" onclick="openEventModal(${event.id})" title="Edit">✏️</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteEvent(${event.id})" title="Delete">🗑️</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    // Initialize drag and drop after rendering
+    setTimeout(() => initializeDragAndDrop(), 0);
+}
+
+function renderTodaySchedule() {
+    const dailyEvents = events.filter(e => e.schedule === 'daily').sort((a, b) => a.time.localeCompare(b.time));
+    const container = document.getElementById('today-schedule');
+    
+    if (!container) return;
+    
+    // Get current time for highlighting
+    const now = new Date();
+    const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+    
+    container.innerHTML = dailyEvents.slice(0, 8).map(event => {
+        const isActive = event.time <= currentTime;
+        const completed = isTaskCompleted(event);
+        return `
+            <div class="time-block ${completed ? 'completed' : ''} ${isActive ? 'active' : ''}">
+                <div class="time">${formatTime(event.time)}</div>
+                <div class="task">
+                    <span class="task-type ${event.category}">${capitalizeFirst(event.category)}</span>
+                    ${event.title}
+                    ${completed ? ' ✅' : ''}
+                </div>
+                <div class="task-actions">
+                    <label class="completion-checkbox" title="Mark as ${completed ? 'incomplete' : 'completed'}">
+                        <input type="checkbox" ${completed ? 'checked' : ''} onchange="toggleTaskCompletion(${event.id})">
+                        <span class="checkmark">${completed ? '✅' : '☐'}</span>
+                    </label>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function updateDashboard() {
+    // Update total tasks count
+    const totalTasksElement = document.getElementById('total-tasks');
+    if (totalTasksElement) {
+        totalTasksElement.textContent = events.length;
+    }
+    
+    // Update today's schedule overview
+    renderTodaySchedule();
+    
+    // Update progress statistics
+    updateProgressStats();
 }
 
 // Manage Events Rendering

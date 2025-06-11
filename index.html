@@ -29,9 +29,8 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzY2N2VlYSIvPgo8cGF0aCBkPSJNMTYgOEwxMSAxM0gxM1YxNkgxOVYxM0gyMUwxNiA4WiIgZmlsbD0id2hpdGUiLz4KPHA+dGggZD0iTTggMTdIMTNWMjJIOFYxN1oiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik08IDI0SDEzVjI5SDhWMjRaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMTkgMjRIMjRWMjlIMTlWMjRaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K">
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iMzAiIGZpbGw9IiM2NjdlZWEiLz4KPHA+dGggZD0iTTkwIDQ1TDYwIDc1SDc1Vjg5SDEwNVY3NUgxMjBMOTAgNDVaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNDUgOThINzVWMTI4SDQ1Vjk4WiIgZmlsbD0id2hpdGUiLz4KPHA+dGggZD0iTTEwNSA5OEgxMzVWMTI4SDEwNVY5OFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik00NSAxMzVINzVWMTY1SDQ1VjEzNVoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMDUgMTM1SDEzNVYxNjVIMTA1VjEzNVoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=">
 </head>
-<body>
-    <!-- Mobile Navigation Toggle -->
-    <button id="mobile-nav-toggle" class="mobile-nav-toggle" aria-expanded="false" aria-label="Toggle navigation menu">
+<body>    <!-- Mobile Navigation Toggle -->
+    <button id="mobile-nav-toggle" class="mobile-nav-toggle" aria-expanded="false" aria-label="Toggle navigation menu" onclick="toggleMobileNav()">
         <span class="nav-icon">☰</span>
     </button>
 
@@ -142,31 +141,30 @@
 
                 <!-- Progress Tracking Section -->
                 <div class="progress-stats">
-                    <h3>🎯 Task Completion Progress</h3>
-                    <div class="progress-container">
+                    <h3>🎯 Task Completion Progress</h3>                    <div class="progress-container">
                         <div class="progress-item">
-                            <label for="daily-progress">Daily Tasks</label>
+                            <label>Daily Tasks</label>
                             <div id="daily-progress" class="progress-bar">
                                 <div class="progress-fill"></div>
                                 <span class="progress-text">0/0 (0%)</span>
                             </div>
                         </div>
                         <div class="progress-item">
-                            <label for="weekly-progress">Weekly Tasks</label>
+                            <label>Weekly Tasks</label>
                             <div id="weekly-progress" class="progress-bar">
                                 <div class="progress-fill"></div>
                                 <span class="progress-text">0/0 (0%)</span>
                             </div>
                         </div>
                         <div class="progress-item">
-                            <label for="monthly-progress">Monthly Tasks</label>
+                            <label>Monthly Tasks</label>
                             <div id="monthly-progress" class="progress-bar">
                                 <div class="progress-fill"></div>
                                 <span class="progress-text">0/0 (0%)</span>
                             </div>
                         </div>
                         <div class="progress-item">
-                            <label for="overall-progress">Overall Progress</label>
+                            <label>Overall Progress</label>
                             <div id="overall-progress" class="progress-bar">
                                 <div class="progress-fill"></div>
                                 <span class="progress-text">0/0 (0%)</span>
@@ -264,14 +262,9 @@
                 </div>
             </div>
         </main>
-    </div>
-
-    <!-- Floating Add Button -->
-    <button class="floating-add-btn" onclick="openEventModal()" title="Add New Event">+</button>    <!-- Mobile Navigation Toggle -->
-    <button class="mobile-nav-toggle" onclick="toggleMobileNav()" title="Toggle Navigation">
-        ☰
-    </button>    <!-- Hidden File Input for Import -->
-    <input type="file" id="import-file" name="import-file" accept=".json" style="display: none;">
+    </div>    <!-- Hidden File Input for Import -->
+    <label for="import-file" class="visually-hidden">Import JSON file</label>
+    <input type="file" id="import-file" name="import-file" accept=".json" class="hidden-file-input" aria-label="Select JSON file to import schedule data">
 
     <!-- Event Modal -->
     <div id="event-modal" class="modal">

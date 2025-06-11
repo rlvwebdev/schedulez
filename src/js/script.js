@@ -1041,30 +1041,46 @@ function closeEventModal() {
 // Mobile navigation functions
 function toggleMobileNav() {
     const sidebar = document.querySelector('.sidebar');
-    const isOpen = sidebar.classList.contains('mobile-open');
+    const toggleBtn = document.getElementById('mobile-nav-toggle');
+    const isOpen = sidebar.classList.contains('nav-mobile-open');
     
     if (isOpen) {
-        sidebar.classList.remove('mobile-open');
+        sidebar.classList.remove('nav-mobile-open');
+        toggleBtn.setAttribute('aria-expanded', 'false');
     } else {
-        sidebar.classList.add('mobile-open');
+        sidebar.classList.add('nav-mobile-open');
+        toggleBtn.setAttribute('aria-expanded', 'true');
     }
 }
 
 function initializeMobileNavigation() {
+    const mobileToggle = document.getElementById('mobile-nav-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    
+    if (mobileToggle) {
+        mobileToggle.addEventListener('click', toggleMobileNav);
+    }
+    
     // Close mobile nav when clicking outside
     document.addEventListener('click', function(e) {
-        const sidebar = document.querySelector('.sidebar');
-        const toggleBtn = document.querySelector('.mobile-nav-toggle');
+        const toggleBtn = document.getElementById('mobile-nav-toggle');
         
-        if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
-            sidebar.classList.remove('mobile-open');
+        if (sidebar && toggleBtn && !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+            sidebar.classList.remove('nav-mobile-open');
+            toggleBtn.setAttribute('aria-expanded', 'false');
         }
     });
     
     // Close mobile nav when nav item is clicked
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', function() {
-            document.querySelector('.sidebar').classList.remove('mobile-open');
+            if (sidebar) {
+                sidebar.classList.remove('nav-mobile-open');
+                const toggleBtn = document.getElementById('mobile-nav-toggle');
+                if (toggleBtn) {
+                    toggleBtn.setAttribute('aria-expanded', 'false');
+                }
+            }
         });
     });
 }

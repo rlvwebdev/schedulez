@@ -2,6 +2,10 @@
 
 A comprehensive, lightweight Progressive Web App (PWA) for managing your daily life and schedule with intelligent planning features. Built for efficiency, accessibility, and offline functionality.
 
+## 🚀 Live Demo
+
+**[Try Schedulez Live →](https://rlvwebdev.github.io/schedulez/)**
+
 ![Schedulez Logo](assets/icons/schedulez-logo.svg)
 
 ## 🌟 Features

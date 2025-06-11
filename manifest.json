@@ -1,13 +1,12 @@
-{
-  "name": "Schedulez - Smart Home Management",
+{  "name": "Schedulez - Smart Home Management",
   "short_name": "Schedulez",
   "description": "Schedulez - Complete smart home and schedule management system with intelligent planning and TMS development tracking",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#3b82f6",
   "theme_color": "#3b82f6",
   "orientation": "portrait-primary",
-  "scope": "/",
+  "scope": "./",
   "lang": "en",
   "categories": ["productivity", "lifestyle"],  "icons": [
     {
@@ -52,14 +51,14 @@
       "name": "Today's Schedule",
       "short_name": "Today",
       "description": "View today's schedule",
-      "url": "/?view=daily",
+      "url": "./?view=daily",
       "icons": [{ "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9Ijk2IiBoZWlnaHQ9Ijk2IiByeD0iMTYiIGZpbGw9IiM2NjdlZWEiLz4KPHA+dGggZD0iTTI0IDMySDcyVjY0SDI0VjMyWiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+", "sizes": "96x96" }]
     },
     {
       "name": "Add Event",
       "short_name": "Add",
       "description": "Add new scheduled event",
-      "url": "/?action=add",
+      "url": "./?action=add",
       "icons": [{ "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9Ijk2IiBoZWlnaHQ9Ijk2IiByeD0iMTYiIGZpbGw9IiM2NjdlZWEiLz4KPHA+dGggZD0iTTQ4IDI0VjcyTTI0IDQ4SDcyIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4=", "sizes": "96x96" }]
     }
   ],

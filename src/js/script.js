@@ -1,17 +1,96 @@
 // Global Variables
-let events = JSON.parse(localStorage.getItem('homeEvents')) || [];
+let events = [];
 let editingEventId = null;
 let deferredPrompt;
+let isInitialized = false;
+let renderQueued = false;
 
-console.log('🔍 Loaded events from localStorage:', events.length);
-
-// Initialize default events if none exist
-if (events.length === 0) {
-    console.log('📝 No events found, initializing defaults...');
-    initializeDefaultEvents();
-} else {
-    console.log('✅ Found existing events:', events.length);
+// Initialize with enhanced error handling
+function initializeAppData() {
+    try {
+        if (!isLocalStorageAvailable()) {
+            // Fallback to memory-only storage
+            events = [];
+            showNotification('Running in memory-only mode. Data will not persist.', 'warning');
+            return;
+        }
+        
+        const storedEvents = localStorage.getItem('homeEvents');
+        if (storedEvents) {
+            events = JSON.parse(storedEvents);
+            console.log('✅ Loaded events from localStorage:', events.length);
+            
+            // Validate loaded data integrity
+            validateLoadedData();
+        } else {
+            console.log('📝 No events found, initializing defaults...');
+            initializeDefaultEvents();
+        }
+        
+        isInitialized = true;
+    } catch (error) {
+        console.error('Failed to initialize app data:', error);
+        showNotification('Failed to load saved data. Starting fresh.', 'error');
+        initializeDefaultEvents();
+        isInitialized = true;
+    }
 }
+
+// Validate data integrity on load
+function validateLoadedData() {
+    try {
+        let hasErrors = false;
+        const validEvents = [];
+        
+        events.forEach((event, index) => {
+            try {
+                validateEventData(event);
+                validEvents.push(event);
+            } catch (error) {
+                console.warn(`Invalid event at index ${index}:`, error.message, event);
+                hasErrors = true;
+            }
+        });
+        
+        if (hasErrors) {
+            events = validEvents;
+            saveEvents();
+            showNotification('Some invalid events were removed during data validation.', 'warning');
+        }
+    } catch (error) {
+        console.error('Data validation failed:', error);
+        // If validation completely fails, reinitialize
+        initializeDefaultEvents();
+    }
+}
+
+// Performance-optimized rendering
+function renderAllViews() {
+    if (!isInitialized) return;
+    
+    // Debounce rapid render calls
+    if (renderQueued) return;
+    renderQueued = true;
+    
+    requestAnimationFrame(() => {
+        try {
+            // Use error boundaries for each render function
+            renderWithErrorBoundary(() => renderDailySchedule(), 'daily-schedule');
+            renderWithErrorBoundary(() => renderWeeklyTasks(), 'weekly-tasks');
+            renderWithErrorBoundary(() => renderMonthlyTasks(), 'monthly-tasks');
+            renderWithErrorBoundary(() => renderManageEvents(), 'events-list');
+            
+            renderQueued = false;
+        } catch (error) {
+            console.error('Critical render failure:', error);
+            showNotification('Display update failed. Please refresh the page.', 'error');
+            renderQueued = false;
+        }
+    });
+}
+
+// Initialize app data on load
+initializeAppData();
 
 // Default events data
 function initializeDefaultEvents() {
@@ -64,43 +143,499 @@ function initializeDefaultEvents() {
     saveEvents();
 }
 
+// Security Functions
+function sanitizeHTML(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function escapeHTML(text) {
+    if (!text) return '';
+    return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;');
+}
+
+// Unique ID Generation
+function generateUniqueId() {
+    // Generate a UUID-like unique identifier
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substr(2, 9);
+    let uniqueId = `event_${timestamp}_${random}`;
+    
+    // Ensure no collision with existing events
+    while (events.some(e => e.id === uniqueId)) {
+        const newRandom = Math.random().toString(36).substr(2, 9);
+        uniqueId = `event_${timestamp}_${newRandom}`;
+    }
+    
+    return uniqueId;
+}
+
+// Data Validation Functions
+function validateEventData(event) {
+    const requiredFields = ['id', 'title', 'time', 'category', 'schedule'];
+    const validCategories = ['personal', 'dogs', 'cleaning', 'kitchen', 'development', 'maintenance'];
+    const validSchedules = ['daily', 'weekly', 'monthly'];
+    const validDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const validWeeks = ['first', 'second', 'third', 'fourth'];
+    
+    // Check required fields
+    for (const field of requiredFields) {
+        if (!event.hasOwnProperty(field) || event[field] === null || event[field] === undefined) {
+            throw new Error(`Missing required field: ${field}`);
+        }
+    }
+    
+    // Validate data types and values
+    if (typeof event.title !== 'string' || event.title.trim().length === 0) {
+        throw new Error('Title must be a non-empty string');
+    }
+    
+    if (typeof event.time !== 'string' || !/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(event.time)) {
+        throw new Error('Time must be in HH:MM format');
+    }
+    
+    if (!validCategories.includes(event.category)) {
+        throw new Error(`Category must be one of: ${validCategories.join(', ')}`);
+    }
+    
+    if (!validSchedules.includes(event.schedule)) {
+        throw new Error(`Schedule must be one of: ${validSchedules.join(', ')}`);
+    }
+    
+    // Schedule-specific validation
+    if (event.schedule === 'weekly') {
+        if (!event.day || !validDays.includes(event.day)) {
+            throw new Error(`Weekly events must have a valid day: ${validDays.join(', ')}`);
+        }
+    }
+    
+    if (event.schedule === 'monthly') {
+        if (!event.week || !validWeeks.includes(event.week)) {
+            throw new Error(`Monthly events must have a valid week: ${validWeeks.join(', ')}`);
+        }
+    }
+    
+    // Optional field validation
+    if (event.description && typeof event.description !== 'string') {
+        throw new Error('Description must be a string');
+    }
+    
+    return true;
+}
+
+function validateImportData(data) {
+    if (!data || typeof data !== 'object') {
+        throw new Error('Invalid data format: must be an object');
+    }
+    
+    if (!data.events || !Array.isArray(data.events)) {
+        throw new Error('Invalid data format: must contain events array');
+    }
+    
+    if (data.events.length === 0) {
+        throw new Error('No events found in import file');
+    }
+    
+    // Validate each event
+    const validatedEvents = [];
+    const seenIds = new Set();
+    
+    for (let i = 0; i < data.events.length; i++) {
+        const event = data.events[i];
+        
+        try {
+            validateEventData(event);
+            
+            // Check for duplicate IDs
+            if (seenIds.has(event.id)) {
+                throw new Error(`Duplicate event ID found: ${event.id}`);
+            }
+            seenIds.add(event.id);
+            
+            // Sanitize string fields
+            const sanitizedEvent = {
+                ...event,
+                title: escapeHTML(event.title.trim()),
+                description: event.description ? escapeHTML(event.description.trim()) : '',
+                category: escapeHTML(event.category.trim()),
+                schedule: escapeHTML(event.schedule.trim()),
+                day: event.day ? escapeHTML(event.day.trim()) : '',
+                week: event.week ? escapeHTML(event.week.trim()) : ''
+            };
+            
+            validatedEvents.push(sanitizedEvent);
+            
+        } catch (error) {
+            throw new Error(`Event ${i + 1}: ${error.message}`);
+        }
+    }
+    
+    return validatedEvents;
+}
+
 // Data Management Functions
 function saveEvents() {
     try {
-        localStorage.setItem('homeEvents', JSON.stringify(events));
+        const dataStr = JSON.stringify(events);
+        
+        // Check data size before saving
+        const dataSize = new Blob([dataStr]).size;
+        
+        // Estimate localStorage usage (rough)
+        let totalSize = 0;
+        for (let key in localStorage) {
+            if (localStorage.hasOwnProperty(key)) {
+                totalSize += localStorage[key].length + key.length;
+            }
+        }
+        
+        // Warn if approaching typical 5MB limit
+        if (totalSize > 4 * 1024 * 1024) { // 4MB warning threshold
+            console.warn('⚠️ LocalStorage approaching capacity:', (totalSize / 1024 / 1024).toFixed(2) + 'MB');
+            showNotification('Warning: Storage space getting low. Consider exporting your data.', 'warning');
+        }
+        
+        localStorage.setItem('homeEvents', dataStr);
         updateProgressStats();
         renderAllViews();
+        
     } catch (error) {
         console.error('Failed to save events:', error);
-        showNotification('Failed to save data. Storage may be full.', 'error');
+        
+        // Handle specific storage errors
+        if (error.name === 'QuotaExceededError' || error.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+            showNotification('Storage quota exceeded! Please export your data and reset to continue.', 'error');
+            // Attempt to free some space by removing old completion data
+            cleanupOldCompletionData();
+        } else if (error.name === 'SecurityError') {
+            showNotification('Storage access denied. Please check browser privacy settings.', 'error');
+        } else {
+            showNotification('Failed to save data: ' + error.message, 'error');
+        }
+    }
+}
+
+// Storage Management Functions
+function cleanupOldCompletionData() {
+    try {
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - 30); // Keep only last 30 days
+        
+        let cleaned = false;
+        events.forEach(event => {
+            if (event.lastCompleted && new Date(event.lastCompleted) < cutoffDate) {
+                event.lastCompleted = null;
+                event.completedToday = false;
+                cleaned = true;
+            }
+        });
+        
+        if (cleaned) {
+            localStorage.setItem('homeEvents', JSON.stringify(events));
+            showNotification('Cleaned up old completion data to free storage space.', 'info');
+        }
+    } catch (error) {
+        console.error('Failed to cleanup old data:', error);
+    }
+}
+
+function getStorageInfo() {
+    try {
+        let totalSize = 0;
+        let eventDataSize = 0;
+        
+        for (let key in localStorage) {
+            if (localStorage.hasOwnProperty(key)) {
+                const itemSize = localStorage[key].length + key.length;
+                totalSize += itemSize;
+                
+                if (key === 'homeEvents') {
+                    eventDataSize = itemSize;
+                }
+            }
+        }
+        
+        return {
+            totalSize: totalSize,
+            eventDataSize: eventDataSize,
+            totalSizeMB: (totalSize / 1024 / 1024).toFixed(2),
+            eventDataSizeMB: (eventDataSize / 1024 / 1024).toFixed(2),
+            percentUsed: Math.round((totalSize / (5 * 1024 * 1024)) * 100) // Assume 5MB limit
+        };
+    } catch (error) {
+        console.error('Failed to get storage info:', error);
+        return null;
+    }
+}
+
+function isLocalStorageAvailable() {
+    try {
+        const test = 'test';
+        localStorage.setItem(test, test);
+        localStorage.removeItem(test);
+        return true;
+    } catch (error) {
+        console.error('LocalStorage not available:', error);
+        showNotification('Local storage is not available. Data will not persist.', 'error');
+        return false;
     }
 }
 
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 DOM loaded, initializing app...');
-    initializeNavigation();
-    initializeEventForm();
-    initializeDragAndDrop();
-    initializeSearch();
-    initializeMobileNavigation();
-    initializeDataManagement();
-    initializeProgressTracking();
-    renderAllViews();
-    updateProgressStats();    // Initialize PWA
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('✅ SW registered:', reg))
-            .catch(err => console.log('❌ SW registration failed:', err));
-    }
     
-    // PWA install prompt
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        showInstallPromotion();
-    });
+    try {        // Initialize core functionality with error handling
+        const initPromises = [
+            initializeWithErrorHandling('Navigation', initializeNavigation),
+            initializeWithErrorHandling('Event Form', initializeEventForm),
+            initializeWithErrorHandling('Drag and Drop', initializeDragAndDrop),
+            initializeWithErrorHandling('Search', initializeSearch),
+            initializeWithErrorHandling('Mobile Navigation', initializeMobileNavigation),
+            initializeWithErrorHandling('Data Management', initializeDataManagement),
+            initializeWithErrorHandling('Progress Tracking', initializeProgressTracking),
+            initializeWithErrorHandling('Focus Management', initializeFocusManagement)
+        ];
+        
+        // Execute initialization tasks
+        Promise.allSettled(initPromises).then(results => {
+            let failedInits = [];
+            results.forEach((result, index) => {
+                if (result.status === 'rejected') {
+                    failedInits.push(result.reason);
+                }
+            });
+            
+            if (failedInits.length > 0) {
+                console.warn('Some initializations failed:', failedInits);
+                showNotification(`Some features may not work properly. Refresh to retry.`, 'warning');
+            }
+            
+            // Always try to render views and update stats
+            renderAllViews();
+            updateProgressStats();
+            
+            console.log('✅ App initialization completed');
+        });
+        
+        // Initialize PWA with error handling
+        initializePWA();
+        
+    } catch (error) {
+        console.error('Critical initialization error:', error);
+        showNotification('App initialization failed. Please refresh the page.', 'error');
+    }
 });
+
+// Helper function for initialization with error handling
+function initializeWithErrorHandling(name, initFunction) {
+    return new Promise((resolve, reject) => {
+        try {
+            const result = initFunction();
+            console.log(`✅ ${name} initialized`);
+            resolve(result);
+        } catch (error) {
+            console.error(`❌ ${name} initialization failed:`, error);
+            reject(`${name}: ${error.message}`);
+        }
+    });
+}
+
+// Enhanced PWA initialization
+function initializePWA() {
+    try {
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => {
+                    console.log('✅ SW registered:', reg);
+                    
+                    // Listen for service worker updates
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed') {
+                                if (navigator.serviceWorker.controller) {
+                                    // New service worker available
+                                    showNotification('App update available. Refresh to update.', 'info');
+                                }
+                            }
+                        });
+                    });
+                })
+                .catch(err => {
+                    console.log('❌ SW registration failed:', err);
+                    // Not critical, continue without SW
+                });
+        }
+        
+        // PWA install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            showInstallPromotion();
+        });
+        
+        // Handle app installation
+        window.addEventListener('appinstalled', () => {
+            showNotification('Schedulez installed successfully!', 'success');
+            deferredPrompt = null;
+        });
+        
+        // Handle navigation share if available
+        if (navigator.share) {
+            console.log('✅ Web Share API available');
+        }
+        
+    } catch (error) {
+        console.warn('PWA initialization failed:', error);
+        // PWA features are optional, continue without them
+    }
+}
+
+// State synchronization improvements
+function synchronizeAppState() {
+    try {
+        // Validate current state
+        if (!events || !Array.isArray(events)) {
+            console.warn('Invalid events state, reinitializing...');
+            initializeDefaultEvents();
+            return;
+        }
+        
+        // Check for state inconsistencies
+        const stateIssues = [];
+        
+        // Validate each event
+        events.forEach((event, index) => {
+            if (!event.id || !event.title || !event.time) {
+                stateIssues.push(`Event ${index}: Missing required fields`);
+            }
+        });
+        
+        // Check for duplicate IDs
+        const seenIds = new Set();
+        events.forEach((event, index) => {
+            if (seenIds.has(event.id)) {
+                stateIssues.push(`Event ${index}: Duplicate ID ${event.id}`);
+            }
+            seenIds.add(event.id);
+        });
+        
+        // Handle state issues
+        if (stateIssues.length > 0) {
+            console.warn('State issues detected:', stateIssues);
+            // Auto-fix common issues
+            fixStateIssues();
+        }
+        
+        // Sync completion states
+        syncCompletionStates();
+        
+    } catch (error) {
+        console.error('State synchronization failed:', error);
+        showNotification('Data sync issues detected. Some features may not work correctly.', 'warning');
+    }
+}
+
+// Fix common state issues
+function fixStateIssues() {
+    try {
+        const validEvents = [];
+        const seenIds = new Set();
+        
+        events.forEach(event => {
+            // Skip events with missing required fields
+            if (!event.id || !event.title || !event.time) {
+                return;
+            }
+            
+            // Fix duplicate IDs
+            if (seenIds.has(event.id)) {
+                event.id = generateUniqueId();
+            }
+            seenIds.add(event.id);
+            
+            // Ensure required fields exist
+            event.completed = event.completed || false;
+            event.completedToday = event.completedToday || false;
+            event.lastCompleted = event.lastCompleted || null;
+            
+            validEvents.push(event);
+        });
+        
+        events = validEvents;
+        saveEvents();
+        
+        showNotification('Fixed data consistency issues.', 'info');
+        
+    } catch (error) {
+        console.error('Failed to fix state issues:', error);
+    }
+}
+
+// Sync completion states with current date
+function syncCompletionStates() {
+    try {
+        const today = new Date().toDateString();
+        const lastSyncDate = localStorage.getItem('lastCompletionSync');
+        
+        if (lastSyncDate !== today) {
+            // Reset daily tasks for new day
+            let resetCount = 0;
+            events.forEach(event => {
+                if (event.schedule === 'daily' && event.completedToday) {
+                    // Only reset if last completed was not today
+                    if (!event.lastCompleted || new Date(event.lastCompleted).toDateString() !== today) {
+                        event.completedToday = false;
+                        resetCount++;
+                    }
+                }
+            });
+            
+            if (resetCount > 0) {
+                localStorage.setItem('lastCompletionSync', today);
+                saveEvents();
+                console.log(`Reset ${resetCount} daily tasks for new day`);
+            }
+        }
+        
+    } catch (error) {
+        console.error('Completion sync failed:', error);
+    }
+}
+
+// Memory leak prevention
+function preventMemoryLeaks() {
+    // Clean up old event listeners
+    const oldElements = document.querySelectorAll('[data-cleanup-listeners]');
+    oldElements.forEach(element => {
+        element.removeEventListener('click', handleOldEventListener);
+        element.removeAttribute('data-cleanup-listeners');
+    });
+    
+    // Limit notification history
+    const notifications = document.querySelectorAll('.notification');
+    if (notifications.length > 10) {
+        // Remove oldest notifications
+        for (let i = 0; i < notifications.length - 10; i++) {
+            notifications[i].remove();
+        }
+    }
+}
+
+// Periodically sync state and prevent memory leaks
+setInterval(() => {
+    synchronizeAppState();
+    preventMemoryLeaks();
+}, 60000); // Every minute
 
 // Navigation functionality
 function initializeNavigation() {
@@ -247,10 +782,9 @@ function saveEvent() {
         if (index !== -1) {
             events[index] = { ...events[index], ...eventData };
             showNotification('Event updated successfully!', 'success');
-        }
-    } else {
+        }    } else {
         // Add new event
-        eventData.id = Date.now();
+        eventData.id = generateUniqueId();
         events.push(eventData);
         showNotification('Event added successfully!', 'success');
     }
@@ -518,6 +1052,86 @@ function performSearch(query) {
     searchResults.innerHTML = html;
 }
 
+// Manage Events Rendering
+function renderManageEvents() {
+    const container = document.getElementById('events-list');
+    if (!container) return;
+    
+    if (events.length === 0) {
+        container.innerHTML = '<div class="no-events" role="status" aria-live="polite">No events configured. Start by adding your first event!</div>';
+        return;
+    }
+    
+    // Sort events by schedule type and time
+    const sortedEvents = [...events].sort((a, b) => {
+        if (a.schedule !== b.schedule) {
+            const scheduleOrder = { daily: 1, weekly: 2, monthly: 3 };
+            return scheduleOrder[a.schedule] - scheduleOrder[b.schedule];
+        }
+        return a.time.localeCompare(b.time);
+    });
+    
+    // Set ARIA attributes for the container
+    container.setAttribute('role', 'list');
+    container.setAttribute('aria-label', `Event management list with ${sortedEvents.length} events`);
+    
+    container.innerHTML = sortedEvents.map((event, index) => {
+        const isCompleted = event.schedule === 'daily' ? event.completedToday : event.completed;
+        
+        return `
+            <div class="event-item ${isCompleted ? 'completed' : ''}" 
+                 data-id="${event.id}" 
+                 draggable="true"
+                 role="listitem"
+                 aria-label="Event: ${escapeHTML(event.title)} scheduled for ${escapeHTML(event.schedule)}"
+                 aria-describedby="event-manage-desc-${event.id}"
+                 tabindex="0">
+                <div class="drag-handle" 
+                     title="Drag to reorder" 
+                     aria-label="Drag handle for ${escapeHTML(event.title)}"
+                     role="button"
+                     tabindex="0"
+                     onkeydown="handleDragKeydown(event, ${event.id})">⋮⋮</div>
+                <div class="event-checkbox-container">
+                    <input type="checkbox" 
+                           class="event-checkbox" 
+                           id="manage-checkbox-${event.id}"
+                           ${isCompleted ? 'checked' : ''} 
+                           onchange="toggleTaskCompletion(${event.id})"
+                           aria-label="Mark ${escapeHTML(event.title)} as ${isCompleted ? 'incomplete' : 'complete'}">
+                </div>
+                <div class="event-content">
+                    <div class="event-header">
+                        <h4 class="event-title" id="manage-title-${event.id}">${escapeHTML(event.title)}</h4>
+                        <div class="event-meta">
+                            <span class="event-time" aria-label="Scheduled time">${escapeHTML(event.time)}</span>
+                            <span class="event-category category-${escapeHTML(event.category)}" 
+                                  aria-label="Category: ${escapeHTML(event.category)}">${escapeHTML(event.category)}</span>
+                            <span class="event-schedule" aria-label="Schedule type">${escapeHTML(event.schedule)}</span>
+                            ${event.day ? `<span class="event-day" aria-label="Day: ${escapeHTML(event.day)}">${escapeHTML(event.day)}</span>` : ''}
+                            ${event.week ? `<span class="event-week" aria-label="Week: ${escapeHTML(event.week)}">${escapeHTML(event.week)}</span>` : ''}
+                        </div>
+                    </div>
+                    ${event.description ? `<p class="event-description" id="event-manage-desc-${event.id}">${escapeHTML(event.description)}</p>` : ''}
+                    ${event.lastCompleted ? `<p class="event-last-completed" aria-label="Last completed on">Last completed: ${new Date(event.lastCompleted).toLocaleString()}</p>` : ''}
+                </div>
+                <div class="event-actions" role="group" aria-label="Event actions">
+                    <button onclick="editEvent(${event.id})" 
+                            class="btn-edit" 
+                            title="Edit ${escapeHTML(event.title)}" 
+                            aria-label="Edit event: ${escapeHTML(event.title)}">✏️</button>
+                    <button onclick="deleteEvent(${event.id})" 
+                            class="btn-delete" 
+                            title="Delete ${escapeHTML(event.title)}" 
+                            aria-label="Delete event: ${escapeHTML(event.title)}">🗑️</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    container.dataset.schedule = 'manage';
+}
+
 // Data Management
 function initializeDataManagement() {
     // Export data
@@ -574,25 +1188,23 @@ function importData() {
         const file = event.target.files[0];
         if (!file) return;
         
-        const reader = new FileReader();
-        reader.onload = function(e) {
+        const reader = new FileReader();        reader.onload = function(e) {
             try {
                 const data = JSON.parse(e.target.result);
                 
-                if (data.events && Array.isArray(data.events)) {
-                    if (confirm('This will replace all your current data. Are you sure?')) {
-                        events = data.events;
-                        saveEvents();
-                        renderAllViews();
-                        updateProgressStats();
-                        showNotification('Data imported successfully!', 'success');
-                    }
-                } else {
-                    throw new Error('Invalid file format');
+                // Validate the imported data
+                const validatedEvents = validateImportData(data);
+                
+                if (confirm(`This will replace all your current data with ${validatedEvents.length} events. Are you sure?`)) {
+                    events = validatedEvents;
+                    saveEvents();
+                    renderAllViews();
+                    updateProgressStats();
+                    showNotification(`Data imported successfully! ${validatedEvents.length} events loaded.`, 'success');
                 }
             } catch (error) {
                 console.error('Import failed:', error);
-                showNotification('Failed to import data. Please check the file format.', 'error');
+                showNotification(`Import failed: ${error.message}`, 'error');
             }
         };
         reader.readAsText(file);
@@ -698,268 +1310,205 @@ function initializeDragAndDrop() {
     });
 }
 
-function reorderEvents(draggedId, targetId) {
-    const draggedIndex = events.findIndex(e => e.id === draggedId);
-    const targetIndex = events.findIndex(e => e.id === targetId);
+// Keyboard Navigation for Drag and Drop
+function handleDragKeydown(event, eventId) {
+    const key = event.key;
     
-    if (draggedIndex === -1 || targetIndex === -1) return;
-    
-    // Remove dragged event from array
-    const [draggedEvent] = events.splice(draggedIndex, 1);
-    
-    // Insert at new position
-    const newTargetIndex = draggedIndex < targetIndex ? targetIndex - 1 : targetIndex;
-    events.splice(newTargetIndex, 0, draggedEvent);
-    
-    // Recalculate times based on position
-    recalculateEventTimes(draggedEvent.schedule, draggedEvent.day, draggedEvent.week);
-    
-    saveEvents();
-    showNotification('Event reordered successfully!', 'success');
+    if (key === 'Enter' || key === ' ') {
+        event.preventDefault();
+        initiateDragMode(eventId);
+    }
 }
 
-function recalculateEventTimes(schedule, day = '', week = '') {
-    const filteredEvents = events.filter(e => {
-        if (e.schedule !== schedule) return false;
-        if (schedule === 'weekly' && e.day !== day) return false;
-        if (schedule === 'monthly' && e.week !== week) return false;
-        return true;
-    });
+function initiateDragMode(eventId) {
+    const eventElement = document.querySelector(`[data-id="${eventId}"]`);
+    if (!eventElement) return;
     
-    // Sort by current time to maintain order
-    filteredEvents.sort((a, b) => a.time.localeCompare(b.time));
+    eventElement.classList.add('keyboard-drag-mode');
+    showNotification('Drag mode activated. Use arrow keys to move, Enter to drop, Escape to cancel.', 'info');
     
-    // Time intervals for each schedule type
-    const intervals = {
-        daily: 30, // 30 minutes
-        weekly: 60, // 1 hour
-        monthly: 120 // 2 hours
-    };
-    
-    const startTimes = {
-        daily: '05:00',
-        weekly: '19:30',
-        monthly: '10:00'
-    };
-    
-    let currentTime = startTimes[schedule];
-    const interval = intervals[schedule];
-    
-    filteredEvents.forEach((event, index) => {
-        if (index === 0) {
-            // Keep first event at start time or its current time if earlier
-            currentTime = event.time < currentTime ? event.time : currentTime;
-        } else {
-            // Calculate next time
-            const [hours, minutes] = currentTime.split(':').map(Number);
-            const totalMinutes = hours * 60 + minutes + interval;
-            const newHours = Math.floor(totalMinutes / 60) % 24;
-            const newMinutes = totalMinutes % 60;
-            currentTime = `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
+    // Add keyboard listeners for drag mode
+    const handleDragNavigation = (e) => {
+        switch (e.key) {
+            case 'ArrowUp':
+                e.preventDefault();
+                moveEventUp(eventId);
+                break;
+            case 'ArrowDown':
+                e.preventDefault();
+                moveEventDown(eventId);
+                break;
+            case 'Enter':
+                e.preventDefault();
+                completeDragOperation(eventId);
+                break;
+            case 'Escape':
+                e.preventDefault();
+                cancelDragOperation(eventId);
+                break;
         }
+    };
+    
+    document.addEventListener('keydown', handleDragNavigation);
+    eventElement.dataset.dragHandler = 'active';
+    
+    // Store cleanup function
+    eventElement._cleanupDrag = () => {
+        document.removeEventListener('keydown', handleDragNavigation);
+        eventElement.classList.remove('keyboard-drag-mode');
+        delete eventElement.dataset.dragHandler;
+        delete eventElement._cleanupDrag;
+    };
+}
+
+function moveEventUp(eventId) {
+    const currentElement = document.querySelector(`[data-id="${eventId}"]`);
+    const previousElement = currentElement.previousElementSibling;
+    
+    if (previousElement && previousElement.dataset.id) {
+        // Swap positions visually
+        currentElement.parentNode.insertBefore(currentElement, previousElement);
+        showNotification('Moved up. Press Enter to confirm or Escape to cancel.', 'info');
+    }
+}
+
+function moveEventDown(eventId) {
+    const currentElement = document.querySelector(`[data-id="${eventId}"]`);
+    const nextElement = currentElement.nextElementSibling;
+    
+    if (nextElement && nextElement.dataset.id) {
+        // Swap positions visually
+        currentElement.parentNode.insertBefore(nextElement, currentElement);
+        showNotification('Moved down. Press Enter to confirm or Escape to cancel.', 'info');
+    }
+}
+
+function completeDragOperation(eventId) {
+    const eventElement = document.querySelector(`[data-id="${eventId}"]`);
+    if (!eventElement) return;
+    
+    // Get new position
+    const allEvents = Array.from(eventElement.parentNode.children);
+    const newIndex = allEvents.indexOf(eventElement);
+    
+    // Update data model
+    const event = events.find(e => e.id === parseInt(eventId));
+    if (event) {
+        // Recalculate times based on new position
+        const schedule = event.schedule;
+        const day = event.day;
+        const week = event.week;
         
-        event.time = currentTime;
-    });
-}
-
-// Render functions
-function renderAllViews() {
-    renderDailySchedule();
-    renderWeeklyTasks();
-    renderMonthlyTasks();
-    updateDashboard();
-}
-
-function renderDailySchedule() {
-    const container = document.getElementById('daily-schedule');
-    if (!container) return;
-    
-    const dailyEvents = events
-        .filter(e => e.schedule === 'daily')
-        .sort((a, b) => a.time.localeCompare(b.time));
-    
-    if (dailyEvents.length === 0) {
-        container.innerHTML = '<div class="no-events">No daily events scheduled.</div>';
-        return;
+        recalculateEventTimes(schedule, day, week);
+        saveEvents();
+        renderAllViews();
+        
+        showNotification('Event moved successfully!', 'success');
     }
     
-    container.innerHTML = dailyEvents.map(event => `
-        <div class="event-item ${event.completedToday ? 'completed' : ''}" data-id="${event.id}" draggable="true">
-            <div class="drag-handle" title="Drag to reorder">⋮⋮</div>            <div class="event-checkbox-container">
-                <input type="checkbox" 
-                       class="event-checkbox" 
-                       ${event.completedToday ? 'checked' : ''} 
-                       onchange="toggleTaskCompletion(${event.id})"
-                       aria-label="Mark task as complete">
-            </div>
-            <div class="event-content">
-                <div class="event-header">
-                    <h4 class="event-title">${event.title}</h4>
-                    <div class="event-meta">
-                        <span class="event-time">${event.time}</span>
-                        <span class="event-category category-${event.category}">${event.category}</span>
-                    </div>
-                </div>
-                ${event.description ? `<p class="event-description">${event.description}</p>` : ''}
-                ${event.lastCompleted ? `<p class="event-last-completed">Last completed: ${new Date(event.lastCompleted).toLocaleString()}</p>` : ''}
-            </div>
-            <div class="event-actions">
-                <button onclick="editEvent(${event.id})" class="btn-edit" title="Edit event" aria-label="Edit event">✏️</button>
-                <button onclick="deleteEvent(${event.id})" class="btn-delete" title="Delete event" aria-label="Delete event">🗑️</button>
-            </div>
-        </div>
-    `).join('');
-    
-    container.dataset.schedule = 'daily';
+    // Cleanup
+    if (eventElement._cleanupDrag) {
+        eventElement._cleanupDrag();
+    }
 }
 
-function renderWeeklyTasks() {
-    const container = document.getElementById('weekly-tasks');
-    if (!container) return;
+function cancelDragOperation(eventId) {
+    const eventElement = document.querySelector(`[data-id="${eventId}"]`);
+    if (!eventElement) return;
     
-    const weeklyEvents = events.filter(e => e.schedule === 'weekly');
-    
-    if (weeklyEvents.length === 0) {
-        container.innerHTML = '<div class="no-events">No weekly events scheduled.</div>';
-        return;
+    // Cleanup and re-render to restore original order
+    if (eventElement._cleanupDrag) {
+        eventElement._cleanupDrag();
     }
     
-    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-    let html = '';
-    
-    days.forEach(day => {
-        const dayEvents = weeklyEvents
-            .filter(e => e.day === day)
-            .sort((a, b) => a.time.localeCompare(b.time));
-        
-        if (dayEvents.length > 0) {
-            html += `
-                <div class="day-section">
-                    <h4 class="day-title">${day.charAt(0).toUpperCase() + day.slice(1)}</h4>
-                    <div class="events-container" data-schedule="weekly" data-day="${day}">`;
-            
-            dayEvents.forEach(event => {
-                html += `
-                    <div class="event-item ${event.completed ? 'completed' : ''}" data-id="${event.id}" draggable="true">
-                        <div class="drag-handle" title="Drag to reorder">⋮⋮</div>
-                        <div class="event-checkbox-container">
-                            <input type="checkbox" 
-                                   class="event-checkbox" 
-                                   ${event.completed ? 'checked' : ''} 
-                                   onchange="toggleTaskCompletion(${event.id})"
-                                   aria-label="Mark task as complete">
-                        </div>
-                        <div class="event-content">
-                            <div class="event-header">
-                                <h4 class="event-title">${event.title}</h4>
-                                <div class="event-meta">
-                                    <span class="event-time">${event.time}</span>
-                                    <span class="event-category category-${event.category}">${event.category}</span>
-                                </div>
-                            </div>
-                            ${event.description ? `<p class="event-description">${event.description}</p>` : ''}
-                            ${event.lastCompleted ? `<p class="event-last-completed">Last completed: ${new Date(event.lastCompleted).toLocaleString()}</p>` : ''}
-                        </div>
-                        <div class="event-actions">
-                            <button onclick="editEvent(${event.id})" class="btn-edit" title="Edit event" aria-label="Edit event">✏️</button>
-                            <button onclick="deleteEvent(${event.id})" class="btn-delete" title="Delete event" aria-label="Delete event">🗑️</button>
-                        </div>
-                    </div>`;
-            });
-            
-            html += '</div></div>';
+    renderAllViews();
+    showNotification('Drag operation cancelled.', 'info');
+}
+
+// Enhanced Focus Management
+function initializeFocusManagement() {
+    // Trap focus in modals
+    document.addEventListener('keydown', function(e) {
+        const modal = document.querySelector('.modal.show, #event-modal.show');
+        if (modal && e.key === 'Tab') {
+            trapFocus(e, modal);
         }
     });
     
-    container.innerHTML = html || '<div class="no-events">No weekly events scheduled.</div>';
-}
-
-function renderMonthlyTasks() {
-    const container = document.getElementById('monthly-tasks');
-    if (!container) return;
-    
-    const monthlyEvents = events.filter(e => e.schedule === 'monthly');
-    
-    if (monthlyEvents.length === 0) {
-        container.innerHTML = '<div class="no-events">No monthly events scheduled.</div>';
-        return;
-    }
-    
-    const weeks = ['first', 'second', 'third', 'fourth'];
-    let html = '';
-    
-    weeks.forEach(week => {
-        const weekEvents = monthlyEvents
-            .filter(e => e.week === week)
-            .sort((a, b) => a.time.localeCompare(b.time));
-        
-        if (weekEvents.length > 0) {
-            html += `
-                <div class="week-section">
-                    <h4 class="week-title">${week.charAt(0).toUpperCase() + week.slice(1)} Week</h4>
-                    <div class="events-container" data-schedule="monthly" data-week="${week}">`;
-            
-            weekEvents.forEach(event => {
-                html += `
-                    <div class="event-item ${event.completed ? 'completed' : ''}" data-id="${event.id}" draggable="true">
-                        <div class="drag-handle" title="Drag to reorder">⋮⋮</div>
-                        <div class="event-checkbox-container">
-                            <input type="checkbox" 
-                                   class="event-checkbox" 
-                                   ${event.completed ? 'checked' : ''} 
-                                   onchange="toggleTaskCompletion(${event.id})"
-                                   aria-label="Mark task as complete">
-                        </div>
-                        <div class="event-content">
-                            <div class="event-header">
-                                <h4 class="event-title">${event.title}</h4>
-                                <div class="event-meta">
-                                    <span class="event-time">${event.time}</span>
-                                    <span class="event-category category-${event.category}">${event.category}</span>
-                                </div>
-                            </div>
-                            ${event.description ? `<p class="event-description">${event.description}</p>` : ''}
-                            ${event.lastCompleted ? `<p class="event-last-completed">Last completed: ${new Date(event.lastCompleted).toLocaleString()}</p>` : ''}
-                        </div>
-                        <div class="event-actions">
-                            <button onclick="editEvent(${event.id})" class="btn-edit" title="Edit event" aria-label="Edit event">✏️</button>
-                            <button onclick="deleteEvent(${event.id})" class="btn-delete" title="Delete event" aria-label="Delete event">🗑️</button>
-                        </div>
-                    </div>`;
-            });
-            
-            html += '</div></div>';
-        }
+    // Announce dynamic content changes
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                announceContentChange(mutation.target);
+            }
+        });
     });
     
-    container.innerHTML = html || '<div class="no-events">No monthly events scheduled.</div>';
-}
-
-// Update dashboard with statistics
-function updateDashboard() {
-    const totalEvents = events.length;
-    const dailyEvents = events.filter(e => e.schedule === 'daily');
-    const weeklyEvents = events.filter(e => e.schedule === 'weekly');
-    const monthlyEvents = events.filter(e => e.schedule === 'monthly');
-    
-    const dailyCompleted = dailyEvents.filter(e => e.completedToday).length;
-    const weeklyCompleted = weeklyEvents.filter(e => e.completed).length;
-    const monthlyCompleted = monthlyEvents.filter(e => e.completed).length;
-    
-    // Update dashboard card statistics
-    const statsElements = {
-        'total-events': totalEvents,
-        'daily-completed-count': dailyCompleted,
-        'weekly-completed-count': weeklyCompleted,
-        'monthly-completed-count': monthlyCompleted
-    };
-    
-    Object.entries(statsElements).forEach(([id, value]) => {
+    // Observe containers that change content
+    const containers = ['daily-schedule', 'weekly-tasks', 'monthly-tasks', 'events-list'];
+    containers.forEach(id => {
         const element = document.getElementById(id);
         if (element) {
-            element.textContent = value;
+            observer.observe(element, { childList: true, subtree: true });
         }
     });
+}
+
+function trapFocus(e, container) {
+    const focusableElements = container.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+    
+    if (e.shiftKey) {
+        if (document.activeElement === firstFocusable) {
+            e.preventDefault();
+            lastFocusable.focus();
+        }
+    } else {
+        if (document.activeElement === lastFocusable) {
+            e.preventDefault();
+            firstFocusable.focus();
+        }
+    }
+}
+
+function announceContentChange(container) {
+    const announcement = container.querySelector('[aria-live]');
+    if (announcement) {
+        // Create temporary announcement
+        const temp = document.createElement('div');
+        temp.setAttribute('aria-live', 'polite');
+        temp.setAttribute('aria-atomic', 'true');
+        temp.className = 'sr-only';
+        temp.textContent = 'Content updated';
+        
+        document.body.appendChild(temp);
+        setTimeout(() => temp.remove(), 1000);
+    }
+}
+
+// Enhanced Error Boundaries for Rendering
+function renderWithErrorBoundary(renderFunction, containerId, fallbackContent = 'Content unavailable') {
+    try {
+        renderFunction();
+    } catch (error) {
+        console.error(`Render error in ${containerId}:`, error);
+        
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.innerHTML = `
+                <div class="error-boundary" role="alert" aria-live="assertive">
+                    <p class="error-message">Unable to display content</p>
+                    <button onclick="location.reload()" class="btn-retry">Refresh Page</button>
+                </div>
+            `;
+        }
+        
+        showNotification(`Failed to display ${containerId}. Please refresh the page.`, 'error');
+    }
 }
 
 // Notification system

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Nav Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 8px; }
+        .test-section h3 { margin-top: 0; color: #333; }
+        .status { padding: 5px 10px; border-radius: 4px; margin: 5px 0; }
+        .pass { background: #d4edda; color: #155724; }
+        .fail { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; background: #007cba; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #005a87; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Schedulez Mobile Navigation Test</h1>
+    
+    <div class="test-section">
+        <h3>Mobile Navigation Button Test</h3>
+        <div id="button-test" class="status info">Testing...</div>
+        <button onclick="testMobileButton()">Test Mobile Button</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>Screen Size Detection</h3>
+        <div id="screen-size" class="status info">Detecting...</div>
+        <div id="breakpoint" class="status info">Loading...</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Elements Check</h3>
+        <div id="elements-check" class="status info">Checking...</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>CSS Rules Check</h3>
+        <div id="css-check" class="status info">Checking...</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>JavaScript Functions Check</h3>
+        <div id="js-check" class="status info">Checking...</div>
+    </div>
+
+    <div class="test-section">
+        <h3>Quick Actions</h3>
+        <button onclick="window.location.href='index.html'">Go to Main App</button>
+        <button onclick="window.location.reload()">Reload Test</button>
+    </div>
+
+    <script>
+        function testMobileButton() {
+            const button = document.getElementById('mobile-nav-toggle');
+            const result = document.getElementById('button-test');
+            
+            if (button) {
+                const isVisible = window.getComputedStyle(button).display !== 'none';
+                const isClickable = button.offsetWidth > 0 && button.offsetHeight > 0;
+                
+                if (isVisible && isClickable) {
+                    result.className = 'status pass';
+                    result.textContent = '✅ Mobile button is visible and clickable';
+                    
+                    // Test click simulation
+                    button.click();
+                    setTimeout(() => {
+                        const sidebar = document.querySelector('.sidebar');
+                        if (sidebar && sidebar.classList.contains('nav-mobile-open')) {
+                            result.textContent += ' - Click test PASSED';
+                        } else {
+                            result.textContent += ' - Click test FAILED';
+                            result.className = 'status fail';
+                        }
+                    }, 100);
+                } else {
+                    result.className = 'status fail';
+                    result.textContent = `❌ Mobile button issue - Visible: ${isVisible}, Clickable: ${isClickable}`;
+                }
+            } else {
+                result.className = 'status fail';
+                result.textContent = '❌ Mobile navigation button not found';
+            }
+        }
+        
+        function updateScreenInfo() {
+            const screenDiv = document.getElementById('screen-size');
+            const breakpointDiv = document.getElementById('breakpoint');
+            
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            screenDiv.textContent = `Screen: ${width}x${height}px`;
+            
+            let breakpoint = 'Mobile';
+            if (width >= 1024) breakpoint = 'Desktop (1024px+)';
+            else if (width >= 768) breakpoint = 'Tablet (768px+)';
+            else if (width >= 480) breakpoint = 'Small Tablet (480px+)';
+            
+            breakpointDiv.textContent = `Current breakpoint: ${breakpoint}`;
+            breakpointDiv.className = 'status ' + (width < 768 ? 'info' : 'pass');
+        }
+        
+        function checkElements() {
+            const elementsDiv = document.getElementById('elements-check');
+            const elements = [
+                'mobile-nav-toggle',
+                'mobile-nav-backdrop',
+                '.sidebar',
+                '.nav-menu'
+            ];
+            
+            let results = [];
+            elements.forEach(el => {
+                const element = el.startsWith('.') ? document.querySelector(el) : document.getElementById(el);
+                results.push(`${el}: ${element ? '✅' : '❌'}`);
+            });
+            
+            elementsDiv.innerHTML = results.join('<br>');
+            elementsDiv.className = results.every(r => r.includes('✅')) ? 'status pass' : 'status fail';
+        }
+        
+        function checkCSS() {
+            const cssDiv = document.getElementById('css-check');
+            const button = document.getElementById('mobile-nav-toggle');
+            
+            if (button) {
+                const styles = window.getComputedStyle(button);
+                const display = styles.display;
+                const position = styles.position;
+                const zIndex = styles.zIndex;
+                
+                cssDiv.innerHTML = `
+                    Display: ${display}<br>
+                    Position: ${position}<br>
+                    Z-Index: ${zIndex}<br>
+                    Top: ${styles.top}<br>
+                    Left: ${styles.left}
+                `;
+                cssDiv.className = display !== 'none' ? 'status pass' : 'status fail';
+            } else {
+                cssDiv.textContent = '❌ Cannot check CSS - button not found';
+                cssDiv.className = 'status fail';
+            }
+        }
+        
+        function checkJS() {
+            const jsDiv = document.getElementById('js-check');
+            
+            // Check if functions exist in main app
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = 'index.html';
+            document.body.appendChild(iframe);
+            
+            iframe.onload = () => {
+                try {
+                    const toggleFunc = iframe.contentWindow.toggleMobileNav;
+                    const initFunc = iframe.contentWindow.initializeMobileNavigation;
+                    
+                    jsDiv.innerHTML = `
+                        toggleMobileNav: ${typeof toggleFunc}<br>
+                        initializeMobileNavigation: ${typeof initFunc}
+                    `;
+                    jsDiv.className = (typeof toggleFunc === 'function' && typeof initFunc === 'function') ? 'status pass' : 'status fail';
+                } catch (e) {
+                    jsDiv.textContent = '❌ Error checking JS functions: ' + e.message;
+                    jsDiv.className = 'status fail';
+                }
+                document.body.removeChild(iframe);
+            };
+        }
+        
+        // Run tests
+        updateScreenInfo();
+        checkElements();
+        checkCSS();
+        checkJS();
+        
+        // Update screen info on resize
+        window.addEventListener('resize', updateScreenInfo);
+    </script>
+</body>
+</html>

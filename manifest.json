@@ -9,18 +9,41 @@
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en",
-  "categories": ["productivity", "lifestyle"],
-  "icons": [
+  "categories": ["productivity", "lifestyle"],  "icons": [
     {
-      "src": "assets/icons/schedulez-logo.svg",
-      "sizes": "120x120",
-      "type": "image/svg+xml",
+      "src": "assets/icons/favicon-16.png",
+      "sizes": "16x16",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "assets/icons/favicon.svg",
+      "src": "assets/icons/favicon-16.svg",
+      "sizes": "16x16",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/favicon-32.svg",
       "sizes": "32x32",
       "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/apple-touch-icon.svg",
+      "sizes": "180x180",
+      "type": "image/svg+xml",  
       "purpose": "any maskable"
     }
   ],

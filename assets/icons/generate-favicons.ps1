@@ -4,12 +4,38 @@
 Write-Host "🎨 Schedulez Favicon Generator" -ForegroundColor Cyan
 Write-Host "================================" -ForegroundColor Cyan
 
-$iconPath = "c:\Users\rlvas\Schedulez\schedulez\assets\icons"
-$svgFiles = @(
-    @{Name="favicon-16"; Size=16},
-    @{Name="favicon-32"; Size=32},
-    @{Name="apple-touch-icon"; Size=180}
-)
+$iconsPath = Get-Location
+Write-Host "📁 Working directory: $iconsPath" -ForegroundColor White
+
+# Check if Inkscape is available (common SVG to PNG converter)
+$hasInkscape = $false
+$inkscapeCmd = ""
+try {
+    $inkscapeCmd = (Get-Command inkscape -ErrorAction Stop).Source
+    $hasInkscape = $true
+    Write-Host "✅ Inkscape found - will use for conversion" -ForegroundColor Green
+} catch {
+    Write-Host "⚠️  Inkscape not found" -ForegroundColor Yellow
+}
+
+# Check if ImageMagick is available
+$hasImageMagick = $false
+try {
+    $null = Get-Command magick -ErrorAction Stop
+    $hasImageMagick = $true
+    Write-Host "✅ ImageMagick found - will use for conversion" -ForegroundColor Green
+} catch {
+    Write-Host "⚠️  ImageMagick not found" -ForegroundColor Yellow
+}
+
+Write-Host ""
+
+# SVG to PNG conversions
+$svgFiles = @{
+    "favicon-16" = 16
+    "favicon-32" = 32
+    "apple-touch-icon" = 180
+}
 
 # Check if Inkscape is available (common SVG to PNG converter)
 $inkscapeExists = $false
@@ -34,39 +60,37 @@ try {
 Write-Host ""
 Write-Host "📁 Processing SVG files in: $iconPath" -ForegroundColor White
 
-foreach ($svg in $svgFiles) {
-    $svgFile = Join-Path $iconPath "$($svg.Name).svg"
-    $pngFile = Join-Path $iconPath "$($svg.Name).png"
-    
-    if (Test-Path $svgFile) {
-        $sizeText = "$($svg.Size)x$($svg.Size)"
-        Write-Host "🔄 Processing $($svg.Name).svg ($sizeText)" -ForegroundColor White
-        
-        if ($inkscapeExists) {
+foreach ($file in $svgFiles.GetEnumerator()) {
+    $svgPath = Join-Path $iconsPath "$($file.Key).svg"
+    $pngPath = Join-Path $iconsPath "$($file.Key).png"
+    if (Test-Path $svgPath) {
+        $size = $file.Value
+        Write-Host "🖼️ Processing $($file.Key)..." -ForegroundColor White
+        if ($hasInkscape) {
             # Use Inkscape for high-quality conversion
-            $cmd = "inkscape --export-type=png --export-width=$($svg.Size) --export-height=$($svg.Size) --export-filename=""$pngFile"" ""$svgFile"""
+            $cmd = "& `"$inkscapeCmd`" --export-type=png --export-width=$size --export-height=$size --export-filename=`"$pngPath`" `"$svgPath`""
             Invoke-Expression $cmd
             Write-Host "  ✅ Created PNG with Inkscape" -ForegroundColor Green
         }
-        elseif ($magickExists) {
+        elseif ($hasImageMagick) {
             # Use ImageMagick as fallback
-            $cmd = "magick ""$svgFile"" -resize $($svg.Size)x$($svg.Size) ""$pngFile"""
+            $cmd = "magick `"$svgPath`" -resize ${size}x${size} `"$pngPath`""
             Invoke-Expression $cmd
             Write-Host "  ✅ Created PNG with ImageMagick" -ForegroundColor Green
         }
         else {
-            Write-Host "  ⚠️  Cannot convert - no conversion tool available" -ForegroundColor Yellow
+            Write-Host "  ⚠️ Cannot convert - no conversion tool available" -ForegroundColor Yellow
         }
     } else {
-        Write-Host "  ❌ SVG file not found: $svgFile" -ForegroundColor Red
+        Write-Host "  ❌ SVG file not found: $svgPath" -ForegroundColor Red
     }
 }
 
 # Create ICO file from 16x16 PNG if we have a conversion tool
-$png16 = Join-Path $iconPath "favicon-16.png"
-$icoFile = Join-Path $iconPath "favicon.ico"
+$png16 = Join-Path $iconsPath "favicon-16.png"
+$icoFile = Join-Path $iconsPath "favicon.ico"
 
-if ((Test-Path $png16) -and $magickExists) {
+if ((Test-Path $png16) -and $hasImageMagick) {
     Write-Host ""
     Write-Host "🔄 Creating favicon.ico from PNG" -ForegroundColor White
     $cmd = "magick `"$png16`" `"$icoFile`""
@@ -75,7 +99,7 @@ if ((Test-Path $png16) -and $magickExists) {
 }
 
 # Update the old favicon-16.ico if we created a new ICO
-$oldIco = Join-Path $iconPath "favicon-16.ico"
+$oldIco = Join-Path $iconsPath "favicon-16.ico"
 if ((Test-Path $icoFile) -and (Test-Path $oldIco)) {
     Copy-Item $icoFile $oldIco -Force
     Write-Host "  ✅ Updated favicon-16.ico" -ForegroundColor Green
@@ -85,7 +109,7 @@ Write-Host ""
 Write-Host "📋 Installation Instructions:" -ForegroundColor Cyan
 Write-Host "=============================" -ForegroundColor Cyan
 
-if (-not $inkscapeExists -and -not $magickExists) {
+if (-not $hasInkscape -and -not $hasImageMagick) {
     Write-Host ""
     Write-Host "⚠️  No SVG conversion tools found. Please install one of:" -ForegroundColor Yellow
     Write-Host "   • Inkscape: https://inkscape.org/release/" -ForegroundColor White

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SVG to PNG Converter</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .converter { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        canvas { border: 1px solid #eee; margin: 10px 0; }
+        button { padding: 10px 20px; margin: 5px; background: #007cba; color: white; border: none; cursor: pointer; }
+        button:hover { background: #005a87; }
+    </style>
+</head>
+<body>
+    <h1>Schedulez Favicon Converter</h1>
+    
+    <div class="converter">
+        <h3>16x16 Favicon</h3>
+        <canvas id="canvas16" width="16" height="16"></canvas>
+        <button onclick="convertSVG('favicon-16', 16)">Generate 16x16 PNG</button>
+        <button id="download16" style="display:none" onclick="downloadPNG('favicon-16', 16)">Download PNG</button>
+    </div>
+    
+    <div class="converter">
+        <h3>32x32 Favicon</h3>
+        <canvas id="canvas32" width="32" height="32"></canvas>
+        <button onclick="convertSVG('favicon-32', 32)">Generate 32x32 PNG</button>
+        <button id="download32" style="display:none" onclick="downloadPNG('favicon-32', 32)">Download PNG</button>
+    </div>
+    
+    <div class="converter">
+        <h3>180x180 Apple Touch Icon</h3>
+        <canvas id="canvas180" width="180" height="180"></canvas>
+        <button onclick="convertSVG('apple-touch-icon', 180)">Generate 180x180 PNG</button>
+        <button id="download180" style="display:none" onclick="downloadPNG('apple-touch-icon', 180)">Download PNG</button>
+    </div>
+
+    <script>
+        async function convertSVG(filename, size) {
+            try {
+                // Load SVG file
+                const response = await fetch(`assets/icons/${filename}.svg`);
+                const svgText = await response.text();
+                
+                // Create image from SVG
+                const img = new Image();
+                const svgBlob = new Blob([svgText], {type: 'image/svg+xml;charset=utf-8'});
+                const url = URL.createObjectURL(svgBlob);
+                
+                img.onload = function() {
+                    const canvas = document.getElementById(`canvas${size}`);
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Clear canvas
+                    ctx.clearRect(0, 0, size, size);
+                    
+                    // Draw image
+                    ctx.drawImage(img, 0, 0, size, size);
+                    
+                    // Show download button
+                    document.getElementById(`download${size}`).style.display = 'inline-block';
+                    
+                    URL.revokeObjectURL(url);
+                };
+                
+                img.src = url;
+                
+            } catch (error) {
+                console.error('Error converting SVG:', error);
+                alert('Error loading SVG file: ' + error.message);
+            }
+        }
+        
+        function downloadPNG(filename, size) {
+            const canvas = document.getElementById(`canvas${size}`);
+            const link = document.createElement('a');
+            link.download = `${filename}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        // Also create ICO from 16x16 canvas
+        function createICO() {
+            const canvas = document.getElementById('canvas16');
+            // For ICO, we'll just use the PNG data
+            const link = document.createElement('a');
+            link.download = 'favicon.ico';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    </script>
+    
+    <div style="margin-top: 40px;">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Click each "Generate" button to create the PNG versions</li>
+            <li>Click "Download PNG" to save each file</li>
+            <li>For favicon.ico, download the 16x16 version and rename to favicon.ico</li>
+            <li>Place all files in the assets/icons/ folder</li>
+        </ol>
+    </div>
+</body>
+</html>

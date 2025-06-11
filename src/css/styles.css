@@ -113,6 +113,7 @@ body {
 
 .sidebar.nav-mobile-open {
     transform: translateX(0);
+    box-shadow: var(--shadow-lg);
 }
 
 /* ================================
@@ -226,7 +227,7 @@ body {
 
 /* Mobile Navigation Toggle */
 .mobile-nav-toggle {
-    display: none;
+    display: block; /* Show by default on mobile */
     position: fixed;
     top: var(--space-4);
     left: var(--space-4);
@@ -239,10 +240,41 @@ body {
     cursor: pointer;
     box-shadow: var(--shadow-md);
     transition: var(--transition);
+    min-width: 44px; /* Touch target size */
+    min-height: 44px; /* Touch target size */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-nav-toggle .nav-icon {
+    margin: 0;
+    font-size: 1.5rem;
+    width: auto;
 }
 
 .mobile-nav-toggle:hover {
     background-color: var(--slate-700);
+    transform: scale(1.05);
+}
+
+/* Mobile Navigation Backdrop */
+.mobile-nav-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.mobile-nav-backdrop.show {
+    display: block;
+    opacity: 1;
 }
 
 /* Floating Add Button */
@@ -980,11 +1012,7 @@ body {
    RESPONSIVE DESIGN - MOBILE FIRST
    ================================ */
 
-/* Show mobile navigation by default (mobile-first) */
-.mobile-nav-toggle {
-    display: block;
-}
-
+/* Show floating add button by default (mobile-first) */
 .floating-add-btn {
     display: block;
 }

@@ -669,29 +669,7 @@ function initializeNavigation() {
     }
 }
 
-// Mobile Navigation
-function initializeMobileNavigation() {
-    const mobileToggle = document.getElementById('mobile-nav-toggle');
-    const navMenu = document.querySelector('.nav');
-    
-    if (mobileToggle && navMenu) {
-        mobileToggle.addEventListener('click', function() {
-            navMenu.classList.toggle('nav-mobile-open');
-            
-            // Update aria-expanded
-            const isOpen = navMenu.classList.contains('nav-mobile-open');
-            this.setAttribute('aria-expanded', isOpen);
-        });
-        
-        // Close mobile menu when clicking nav links
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                navMenu.classList.remove('nav-mobile-open');
-                mobileToggle.setAttribute('aria-expanded', 'false');
-            });
-        });
-    }
-}
+// Mobile navigation is handled by the function at the end of the file
 
 // Event form functionality
 function initializeEventForm() {
@@ -1591,47 +1569,81 @@ function closeEventModal() {
 function toggleMobileNav() {
     const sidebar = document.querySelector('.sidebar');
     const toggleBtn = document.getElementById('mobile-nav-toggle');
+    const backdrop = document.getElementById('mobile-nav-backdrop');
     const isOpen = sidebar.classList.contains('nav-mobile-open');
     
     if (isOpen) {
         sidebar.classList.remove('nav-mobile-open');
+        backdrop.classList.remove('show');
         toggleBtn.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = ''; // Restore scroll
     } else {
         sidebar.classList.add('nav-mobile-open');
+        backdrop.classList.add('show');
         toggleBtn.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden'; // Prevent background scroll
     }
+}
+
+function closeMobileNav() {
+    const sidebar = document.querySelector('.sidebar');
+    const toggleBtn = document.getElementById('mobile-nav-toggle');
+    const backdrop = document.getElementById('mobile-nav-backdrop');
+    
+    sidebar.classList.remove('nav-mobile-open');
+    backdrop.classList.remove('show');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
 }
 
 function initializeMobileNavigation() {
     const mobileToggle = document.getElementById('mobile-nav-toggle');
     const sidebar = document.querySelector('.sidebar');
+    const backdrop = document.getElementById('mobile-nav-backdrop');
     
     if (mobileToggle) {
         mobileToggle.addEventListener('click', toggleMobileNav);
+    }
+    
+    // Close mobile nav when clicking backdrop
+    if (backdrop) {
+        backdrop.addEventListener('click', closeMobileNav);
     }
     
     // Close mobile nav when clicking outside
     document.addEventListener('click', function(e) {
         const toggleBtn = document.getElementById('mobile-nav-toggle');
         
-        if (sidebar && toggleBtn && !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
-            sidebar.classList.remove('nav-mobile-open');
-            toggleBtn.setAttribute('aria-expanded', 'false');
+        if (sidebar && toggleBtn && 
+            !sidebar.contains(e.target) && 
+            !toggleBtn.contains(e.target) &&
+            sidebar.classList.contains('nav-mobile-open')) {
+            closeMobileNav();
         }
     });
     
     // Close mobile nav when nav item is clicked
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', function() {
-            if (sidebar) {
-                sidebar.classList.remove('nav-mobile-open');
-                const toggleBtn = document.getElementById('mobile-nav-toggle');
-                if (toggleBtn) {
-                    toggleBtn.setAttribute('aria-expanded', 'false');
-                }
-            }
+            // Small delay to ensure page transition starts
+            setTimeout(closeMobileNav, 100);
         });
     });
+    
+    // Handle escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && sidebar.classList.contains('nav-mobile-open')) {
+            closeMobileNav();
+        }
+    });
+    
+    // Handle resize events - close mobile nav if screen becomes large
+    window.addEventListener('resize', function() {
+        if (window.innerWidth >= 768 && sidebar.classList.contains('nav-mobile-open')) {
+            closeMobileNav();
+        }
+    });
+}
 }
 
 // Debug helpers

@@ -1633,7 +1633,7 @@ function initializeMobileNavigation() {
     // Handle escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && sidebar.classList.contains('nav-mobile-open')) {
-            closeMobileNav();
+                    closeMobileNav();
         }
     });
     
@@ -1643,7 +1643,6 @@ function initializeMobileNavigation() {
             closeMobileNav();
         }
     });
-}
 }
 
 // Debug helpers

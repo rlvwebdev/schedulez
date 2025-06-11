@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Missing Favicons</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; margin-bottom: 20px; }
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #007cba;
+            border-radius: 4px;
+        }
+        .step h3 { margin-top: 0; color: #007cba; }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover { background: #005a87; }
+        .success { color: #28a745; font-weight: bold; }
+        .error { color: #dc3545; font-weight: bold; }
+        canvas { 
+            border: 1px solid #ddd; 
+            margin: 10px;
+            background: white;
+        }
+        .download-section {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Schedulez Favicon Generator</h1>
+        
+        <div class="step">
+            <h3>Step 1: Generate PNG Files</h3>
+            <p>Click the buttons below to generate the missing PNG favicon files from your SVG sources.</p>
+            
+            <button onclick="generateFavicon('favicon-16.svg', 16, 'favicon-16.png')">
+                Generate 16x16 Favicon
+            </button>
+            
+            <button onclick="generateFavicon('favicon-32.svg', 32, 'favicon-32.png')">
+                Generate 32x32 Favicon
+            </button>
+            
+            <button onclick="generateFavicon('apple-touch-icon.svg', 180, 'apple-touch-icon.png')">
+                Generate Apple Touch Icon
+            </button>
+            
+            <div id="canvases"></div>
+        </div>
+        
+        <div class="download-section">
+            <h3>📥 Downloads</h3>
+            <div id="downloads"></div>
+        </div>
+        
+        <div class="step">
+            <h3>Step 2: Upload Files</h3>
+            <p>After downloading the PNG files:</p>
+            <ol>
+                <li>Place all PNG files in <code>assets/icons/</code> folder</li>
+                <li>Rename <code>favicon-16.png</code> to <code>favicon.ico</code></li>
+                <li>Commit and push to GitHub</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        async function generateFavicon(svgFile, size, outputName) {
+            const canvasContainer = document.getElementById('canvases');
+            const downloadsContainer = document.getElementById('downloads');
+            
+            try {
+                // Create canvas
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                canvas.title = outputName;
+                
+                const ctx = canvas.getContext('2d');
+                
+                // Load SVG
+                const response = await fetch(`assets/icons/${svgFile}`);
+                if (!response.ok) {
+                    throw new Error(`Could not load ${svgFile}`);
+                }
+                
+                const svgText = await response.text();
+                
+                // Create image from SVG
+                const img = new Image();
+                const svgBlob = new Blob([svgText], {type: 'image/svg+xml;charset=utf-8'});
+                const url = URL.createObjectURL(svgBlob);
+                
+                return new Promise((resolve, reject) => {
+                    img.onload = function() {
+                        // Fill with white background
+                        ctx.fillStyle = 'white';
+                        ctx.fillRect(0, 0, size, size);
+                        
+                        // Draw the SVG
+                        ctx.drawImage(img, 0, 0, size, size);
+                        
+                        // Add canvas to page for preview
+                        canvasContainer.appendChild(canvas);
+                        
+                        // Create download link
+                        const dataUrl = canvas.toDataURL('image/png');
+                        const link = document.createElement('a');
+                        link.href = dataUrl;
+                        link.download = outputName;
+                        link.textContent = `⬇️ Download ${outputName}`;
+                        link.style.display = 'block';
+                        link.style.margin = '10px 0';
+                        link.style.padding = '10px';
+                        link.style.background = '#007cba';
+                        link.style.color = 'white';
+                        link.style.textDecoration = 'none';
+                        link.style.borderRadius = '4px';
+                        
+                        downloadsContainer.appendChild(link);
+                        
+                        // Auto-download
+                        link.click();
+                        
+                        URL.revokeObjectURL(url);
+                        resolve(dataUrl);
+                        
+                        console.log(`✅ Generated ${outputName}`);
+                    };
+                    
+                    img.onerror = function() {
+                        reject(new Error(`Failed to load image from ${svgFile}`));
+                    };
+                    
+                    img.src = url;
+                });
+                
+            } catch (error) {
+                console.error(`❌ Error generating ${outputName}:`, error);
+                
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.textContent = `Error generating ${outputName}: ${error.message}`;
+                downloadsContainer.appendChild(errorDiv);
+            }
+        }
+        
+        // Auto-generate on page load after a short delay
+        setTimeout(() => {
+            console.log('🎨 Starting automatic favicon generation...');
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -772,10 +772,15 @@ function refreshCurrentView() {
 
 // Dashboard Functions
 function updateDashboard() {
-  // Update total tasks count
+  // Update total tasks count for both mobile and desktop
   const totalTasksElement = document.getElementById('total-tasks');
+  const mobileTotalTasksElement = document.getElementById('mobile-total-tasks');
+  
   if (totalTasksElement) {
     totalTasksElement.textContent = events.length;
+  }
+  if (mobileTotalTasksElement) {
+    mobileTotalTasksElement.textContent = events.length;
   }
 
   // Update dashboard stats
@@ -797,19 +802,24 @@ function updateDashboardStats() {
   const weeklyCompleted = weeklyTasks.filter(e => e.completed).length;
   const monthlyCompleted = monthlyTasks.filter(e => e.completed).length;
   
-  // Update mobile stats
-  const mobileDailyCompletedElement = document.getElementById('mobile-daily-completed');
-  const mobileWeeklyCompletedElement = document.getElementById('mobile-weekly-completed');
-  const mobileMonthlyCompletedElement = document.getElementById('mobile-monthly-completed');
+  // Update mobile stats - completed today should show total completed
+  const mobileCompletedTodayElement = document.getElementById('mobile-completed-today');
+  if (mobileCompletedTodayElement) {
+    mobileCompletedTodayElement.textContent = dailyCompleted;
+  }
   
-  if (mobileDailyCompletedElement) {
-    mobileDailyCompletedElement.textContent = dailyCompleted;
+  // Update mobile progress displays
+  const mobileDailyProgressElement = document.getElementById('mobile-daily-progress');
+  const mobileWeeklyProgressElement = document.getElementById('mobile-weekly-progress');
+  
+  if (mobileDailyProgressElement) {
+    const dailyPercent = dailyTasks.length > 0 ? Math.round((dailyCompleted / dailyTasks.length) * 100) : 0;
+    mobileDailyProgressElement.textContent = `${dailyPercent}%`;
   }
-  if (mobileWeeklyCompletedElement) {
-    mobileWeeklyCompletedElement.textContent = weeklyCompleted;
-  }
-  if (mobileMonthlyCompletedElement) {
-    mobileMonthlyCompletedElement.textContent = monthlyCompleted;
+  
+  if (mobileWeeklyProgressElement) {
+    const weeklyPercent = weeklyTasks.length > 0 ? Math.round((weeklyCompleted / weeklyTasks.length) * 100) : 0;
+    mobileWeeklyProgressElement.textContent = `${weeklyPercent}%`;
   }
   
   // Update desktop stats
@@ -845,7 +855,16 @@ function updateProgressStats() {
   const totalTasks = events.length;
   const totalCompleted = dailyCompleted + weeklyCompleted + monthlyCompleted;
   
-  // Update progress bars
+  // Update mobile progress bars
+  updateProgressBarById('mobile-daily-progress-bar', dailyCompleted, dailyTasks.length);
+  updateProgressBarById('mobile-weekly-progress-bar', weeklyCompleted, weeklyTasks.length);
+  
+  // Update desktop progress bars
+  updateProgressBarById('desktop-daily-progress-bar', dailyCompleted, dailyTasks.length);
+  updateProgressBarById('desktop-weekly-progress-bar', weeklyCompleted, weeklyTasks.length);
+  updateProgressBarById('desktop-monthly-progress-bar', monthlyCompleted, monthlyTasks.length);
+  
+  // Update legacy progress bars (if they exist)
   updateProgressBar('daily-progress', dailyCompleted, dailyTasks.length);
   updateProgressBar('weekly-progress', weeklyCompleted, weeklyTasks.length);
   updateProgressBar('monthly-progress', monthlyCompleted, monthlyTasks.length);
@@ -1469,11 +1488,10 @@ function importData(input) {
   
   const reader = new FileReader();
   reader.onload = function(e) {
-    try {
-      const data = JSON.parse(e.target.result);
+    try {      const data = JSON.parse(e.target.result);
       if (data.events && Array.isArray(data.events)) {
         events = data.events.filter(event => event.id && event.title);
-        saveEventsToStorage();
+        saveEvents();
         loadDashboardContent();
         showNotification(`Imported ${events.length} events`, 'success');
       } else {
@@ -1905,5 +1923,22 @@ function populateEventForm(eventId) {
   updateDayWeekFields();
 }
 
-// Modal Functions
+// Enhanced progress bar update function
+function updateProgressBarById(id, completed, total) {
+  const progressFill = document.getElementById(id);
+  
+  if (progressFill) {
+    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+    progressFill.style.width = `${percentage}%`;
+    
+    // Add completion classes for styling
+    const progressBar = progressFill.closest('.progress-bar-enhanced');
+    if (progressBar) {
+      progressBar.classList.toggle('progress-complete', percentage === 100);
+      progressBar.classList.toggle('progress-high', percentage >= 80 && percentage < 100);
+    }
+  }
+}
+
+// Enhanced progress bar update function
 

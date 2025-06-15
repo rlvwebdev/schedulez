@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedulez Debug Test</title>
+    <link rel="stylesheet" href="src/css/styles.css">
+    <link rel="stylesheet" href="src/css/theme-system.css">
+    <style>
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #000;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 9999;
+            max-width: 300px;
+        }
+        .debug-section {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-info" id="debug-info">
+        <div class="debug-section">
+            <strong>JavaScript Status:</strong>
+            <div id="js-status">Loading...</div>
+        </div>
+        <div class="debug-section">
+            <strong>Modal Status:</strong>
+            <div id="modal-status">...</div>
+        </div>
+        <div class="debug-section">
+            <strong>Navigation Status:</strong>
+            <div id="nav-status">...</div>
+        </div>
+        <div class="debug-section">
+            <strong>Errors:</strong>
+            <div id="error-log">...</div>
+        </div>
+    </div>
+
+    <!-- Test the modal visibility -->
+    <div id="event-modal" class="modal-enhanced hidden">
+        <div class="modal-content-enhanced">
+            <h2>Test Modal</h2>
+            <p>This modal should be hidden by default</p>
+            <button onclick="closeEventModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Test navigation -->
+    <div style="padding: 20px;">
+        <h1>Schedulez Debug Test</h1>
+        <button onclick="testModal()">Test Modal Open</button>
+        <button onclick="testNavigation()">Test Navigation</button>
+        
+        <div id="test-results" style="margin-top: 20px; padding: 20px; background: #f0f0f0;">
+            <h3>Test Results:</h3>
+            <div id="results-content">Click buttons to run tests</div>
+        </div>
+    </div>
+
+    <script src="src/js/script.js"></script>
+    <script>
+        // Debug script
+        let errorLog = [];
+        
+        // Capture errors
+        window.onerror = function(msg, url, line, col, error) {
+            errorLog.push(`${msg} at ${url}:${line}:${col}`);
+            updateDebugInfo();
+        };
+
+        function updateDebugInfo() {
+            document.getElementById('js-status').innerHTML = 'Loaded';
+            
+            // Check modal
+            const modal = document.getElementById('event-modal');
+            const modalStatus = modal ? 
+                `Modal exists: ${modal.classList.contains('hidden') ? 'Hidden' : 'Visible'}` : 
+                'Modal not found';
+            document.getElementById('modal-status').innerHTML = modalStatus;
+            
+            // Check navigation elements
+            const navLinks = document.querySelectorAll('.bottom-nav-link');
+            document.getElementById('nav-status').innerHTML = `Nav links found: ${navLinks.length}`;
+            
+            // Show errors
+            document.getElementById('error-log').innerHTML = errorLog.length > 0 ? 
+                errorLog.join('<br>') : 'No errors';
+        }
+
+        function testModal() {
+            const modal = document.getElementById('event-modal');
+            const results = document.getElementById('results-content');
+            
+            if (modal) {
+                const isHidden = modal.classList.contains('hidden');
+                results.innerHTML += `<p>Modal test: Found modal, hidden=${isHidden}</p>`;
+                
+                // Try to show/hide
+                if (isHidden) {
+                    modal.classList.remove('hidden');
+                    results.innerHTML += `<p>Removed hidden class</p>`;
+                } else {
+                    modal.classList.add('hidden');
+                    results.innerHTML += `<p>Added hidden class</p>`;
+                }
+            } else {
+                results.innerHTML += `<p>Modal test: Modal not found!</p>`;
+            }
+        }
+
+        function testNavigation() {
+            const results = document.getElementById('results-content');
+            const navLinks = document.querySelectorAll('.bottom-nav-link');
+            
+            results.innerHTML += `<p>Navigation test: Found ${navLinks.length} nav links</p>`;
+            
+            // Test if functions exist
+            const functions = ['navigateToPage', 'showResponsiveContent', 'initializeNavigation'];
+            functions.forEach(func => {
+                const exists = typeof window[func] === 'function';
+                results.innerHTML += `<p>${func}: ${exists ? 'EXISTS' : 'MISSING'}</p>`;
+            });
+        }
+
+        // Initialize debug
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(updateDebugInfo, 1000);
+        });
+    </script>
+</body>
+</html>

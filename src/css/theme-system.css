@@ -631,6 +631,10 @@ body {
   padding: 1rem;
 }
 
+.modal-enhanced.hidden {
+  display: none;
+}
+
 .modal-content-enhanced {
   background-color: var(--bg-primary);
   border-radius: 1rem;

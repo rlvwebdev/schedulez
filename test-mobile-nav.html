@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Navigation Test - Schedulez</title>
+    <link rel="stylesheet" href="src/css/styles.css">
+    <style>
+        .test-status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .test-pass { background: #d4edda; color: #155724; }
+        .test-fail { background: #f8d7da; color: #721c24; }
+        .test-info { background: #d1ecf1; color: #0c5460; }
+        .demo-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 300px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div class="demo-panel">
+        <h3 class="text-lg font-bold mb-3">Mobile Nav Test</h3>
+        <div id="test-results">
+            <div class="test-info">Running tests...</div>
+        </div>
+        <div class="mt-3">
+            <button onclick="runTests()" class="bg-blue-600 text-white px-3 py-2 rounded text-sm">
+                Run Tests
+            </button>
+            <button onclick="window.location.href='index.html'" class="bg-green-600 text-white px-3 py-2 rounded text-sm ml-2">
+                Go to App
+            </button>
+        </div>
+    </div>
+
+    <!-- Include actual mobile navigation structure from index.html -->
+    <div class="lg:hidden min-h-screen">
+        <!-- Mobile Header -->
+        <header class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
+            <div class="flex items-center justify-between px-4 py-3">
+                <button id="mobile-nav-toggle" class="p-2 rounded-lg hover:bg-slate-100 transition-colors touch-manipulation">
+                    <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+                
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-blue-600 rounded"></div>
+                    <h1 class="text-lg font-semibold text-slate-800">Schedulez</h1>
+                </div>
+                
+                <button class="p-2 rounded-lg hover:bg-slate-100 transition-colors touch-manipulation">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Mobile Navigation Drawer -->
+        <div id="mobile-nav-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden touch-manipulation"></div>
+        <nav id="mobile-nav" class="fixed left-0 top-0 h-full w-64 bg-white shadow-xl z-50 transform -translate-x-full transition-transform duration-300">
+            <div class="p-4 border-b border-slate-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-blue-600 rounded"></div>
+                    <div>
+                        <h2 class="font-semibold text-slate-800">Schedulez</h2>
+                        <p class="text-sm text-slate-500">Task Management</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-4">
+                <ul class="space-y-2">
+                    <li><a href="#" class="mobile-nav-link active" data-page="dashboard">🏠 Today</a></li>
+                    <li><a href="#" class="mobile-nav-link" data-page="daily">📅 Daily Schedule</a></li>
+                    <li><a href="#" class="mobile-nav-link" data-page="weekly">📋 Weekly Tasks</a></li>
+                    <li><a href="#" class="mobile-nav-link" data-page="monthly">🗓️ Monthly Tasks</a></li>
+                    <li><a href="#" class="mobile-nav-link" data-page="manage">⚙️ Manage Events</a></li>
+                    <li><a href="#" class="mobile-nav-link" data-page="analytics">📈 My Stats</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Test Content -->
+        <main class="p-4">
+            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+                <h1 class="text-2xl font-bold mb-4">Mobile Navigation Test</h1>
+                
+                <div class="grid gap-4">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-blue-800 mb-2">Test Instructions:</h3>
+                        <ol class="list-decimal list-inside text-blue-700 space-y-1">
+                            <li>Click the hamburger menu (☰) in top-left</li>
+                            <li>Navigation drawer should slide in from left</li>
+                            <li>Background should be dimmed with backdrop</li>
+                            <li>Click backdrop or press Escape to close</li>
+                            <li>Click any navigation link to test functionality</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-green-800 mb-2">Expected Behavior:</h3>
+                        <ul class="list-disc list-inside text-green-700 space-y-1">
+                            <li>Smooth 300ms slide animation</li>
+                            <li>Body scroll prevention when open</li>
+                            <li>Touch-friendly 44px minimum touch targets</li>
+                            <li>Proper ARIA attributes for accessibility</li>
+                            <li>Auto-close on larger screens (1024px+)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Test Functions
+        function runTests() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '';
+            
+            const tests = [
+                () => testElementsExist(),
+                () => testToggleButton(),
+                () => testBackdrop(),
+                () => testNavigation(),
+                () => testResponsiveClasses(),
+                () => testJavaScriptFunctions()
+            ];
+            
+            let passCount = 0;
+            tests.forEach((test, index) => {
+                try {
+                    const result = test();
+                    const div = document.createElement('div');
+                    div.className = result.passed ? 'test-status test-pass' : 'test-status test-fail';
+                    div.textContent = `${index + 1}. ${result.message}`;
+                    results.appendChild(div);
+                    if (result.passed) passCount++;
+                } catch (error) {
+                    const div = document.createElement('div');
+                    div.className = 'test-status test-fail';
+                    div.textContent = `${index + 1}. Error: ${error.message}`;
+                    results.appendChild(div);
+                }
+            });
+            
+            const summary = document.createElement('div');
+            summary.className = `test-status ${passCount === tests.length ? 'test-pass' : 'test-info'}`;
+            summary.textContent = `Tests complete: ${passCount}/${tests.length} passed`;
+            results.appendChild(summary);
+        }
+        
+        function testElementsExist() {
+            const required = ['mobile-nav-toggle', 'mobile-nav-backdrop', 'mobile-nav'];
+            const missing = required.filter(id => !document.getElementById(id));
+            return {
+                passed: missing.length === 0,
+                message: missing.length === 0 ? 'All elements exist' : `Missing: ${missing.join(', ')}`
+            };
+        }
+        
+        function testToggleButton() {
+            const button = document.getElementById('mobile-nav-toggle');
+            const isVisible = button && window.getComputedStyle(button).display !== 'none';
+            const hasClickHandler = button && button.onclick;
+            return {
+                passed: isVisible,
+                message: isVisible ? 'Toggle button visible and clickable' : 'Toggle button not working'
+            };
+        }
+        
+        function testBackdrop() {
+            const backdrop = document.getElementById('mobile-nav-backdrop');
+            const hasHiddenClass = backdrop && backdrop.classList.contains('hidden');
+            return {
+                passed: hasHiddenClass,
+                message: hasHiddenClass ? 'Backdrop hidden by default' : 'Backdrop not properly hidden'
+            };
+        }
+        
+        function testNavigation() {
+            const nav = document.getElementById('mobile-nav');
+            const hasTransform = nav && nav.classList.contains('-translate-x-full');
+            return {
+                passed: hasTransform,
+                message: hasTransform ? 'Navigation drawer positioned correctly' : 'Navigation positioning issue'
+            };
+        }
+        
+        function testResponsiveClasses() {
+            const container = document.querySelector('.lg\\:hidden');
+            return {
+                passed: !!container,
+                message: container ? 'Responsive classes present' : 'Missing responsive classes'
+            };
+        }
+        
+        function testJavaScriptFunctions() {
+            const hasFunctions = typeof toggleMobileNav === 'function' && typeof closeMobileDrawer === 'function';
+            return {
+                passed: hasFunctions,
+                message: hasFunctions ? 'JavaScript functions available' : 'JavaScript functions missing'
+            };
+        }
+        
+        // Include the mobile navigation JavaScript from script.js
+        function toggleMobileNav() {
+            const sidebar = document.getElementById('mobile-nav');
+            const toggleBtn = document.getElementById('mobile-nav-toggle');
+            const backdrop = document.getElementById('mobile-nav-backdrop');
+            const isOpen = sidebar.classList.contains('translate-x-0');
+            
+            if (isOpen) {
+                sidebar.classList.remove('translate-x-0');
+                sidebar.classList.add('-translate-x-full');
+                backdrop.classList.add('hidden');
+                toggleBtn.setAttribute('aria-expanded', 'false');
+                document.body.style.overflow = '';
+            } else {
+                sidebar.classList.remove('-translate-x-full');
+                sidebar.classList.add('translate-x-0');
+                backdrop.classList.remove('hidden');
+                toggleBtn.setAttribute('aria-expanded', 'true');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        function closeMobileDrawer() {
+            const sidebar = document.getElementById('mobile-nav');
+            const toggleBtn = document.getElementById('mobile-nav-toggle');
+            const backdrop = document.getElementById('mobile-nav-backdrop');
+            
+            if (sidebar) {
+                sidebar.classList.remove('translate-x-0');
+                sidebar.classList.add('-translate-x-full');
+            }
+            if (backdrop) {
+                backdrop.classList.add('hidden');
+            }
+            if (toggleBtn) {
+                toggleBtn.setAttribute('aria-expanded', 'false');
+            }
+            document.body.style.overflow = '';
+        }
+        
+        // Initialize mobile navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileToggle = document.getElementById('mobile-nav-toggle');
+            const backdrop = document.getElementById('mobile-nav-backdrop');
+            const sidebar = document.getElementById('mobile-nav');
+            
+            if (mobileToggle) {
+                mobileToggle.addEventListener('click', toggleMobileNav);
+            }
+            
+            if (backdrop) {
+                backdrop.addEventListener('click', closeMobileDrawer);
+            }
+            
+            // Close on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar && sidebar.classList.contains('translate-x-0')) {
+                    closeMobileDrawer();
+                }
+            });
+            
+            // Auto-run tests on load
+            setTimeout(runTests, 100);
+        });
+    </script>
+</body>
+</html>

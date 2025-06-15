@@ -2,9 +2,11 @@
 // This module handles CRUD operations and event management functionality
 
 // Render the manage events page with all events
-export function renderManageEvents() {
-    const container = document.getElementById('events-list');
-    if (!container) return;
+export function renderManageEvents(containerId = 'events-list') {
+    const container = document.getElementById(containerId);
+    if (!container) {
+        return;
+    }
     
     if (events.length === 0) {
         container.innerHTML = '<div class="no-events" role="status" aria-live="polite">No events configured. Start by adding your first event!</div>';

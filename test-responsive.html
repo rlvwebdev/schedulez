@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedulez - Responsive Test</title>
+    <link rel="stylesheet" href="src/css/styles.css">
+    <style>
+        .test-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 8px 12px;
+            background: #ef4444;
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 100;
+        }
+        .test-indicator.mobile {
+            background: #22c55e;
+        }
+        .test-indicator.desktop {
+            background: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <!-- Responsive Indicator -->
+    <div class="test-indicator lg:hidden mobile">MOBILE VIEW</div>
+    <div class="test-indicator hidden lg:block desktop">DESKTOP VIEW</div>
+    
+    <div class="p-4">
+        <h1 class="text-2xl font-bold mb-4">Schedulez Responsive Layout Test</h1>
+        
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">Current Breakpoint Test</h2>
+            <div class="grid gap-4">
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <h3 class="font-medium mb-2">Mobile First Visibility</h3>
+                    <div class="lg:hidden text-green-600">✓ Mobile layout visible (default)</div>
+                    <div class="hidden lg:block text-blue-600">✓ Desktop layout visible (lg+)</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">Navigation Test</h2>
+            <div class="grid gap-4">
+                <!-- Mobile Nav Test -->
+                <div class="lg:hidden bg-white p-4 rounded-lg shadow-sm">
+                    <h3 class="font-medium mb-2">Mobile Navigation Elements</h3>
+                    <div class="space-y-2">
+                        <div class="flex items-center space-x-2">
+                            <button class="p-2 bg-blue-600 text-white rounded touch-manipulation">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                                </svg>
+                            </button>
+                            <span class="text-sm">Hamburger Menu (Touch Optimized)</span>
+                        </div>
+                        <div class="text-sm text-slate-600">• Bottom navigation should be visible</div>
+                        <div class="text-sm text-slate-600">• Touch targets are 44px minimum</div>
+                    </div>
+                </div>
+                
+                <!-- Desktop Nav Test -->
+                <div class="hidden lg:block bg-white p-4 rounded-lg shadow-sm">
+                    <h3 class="font-medium mb-2">Desktop Navigation Elements</h3>
+                    <div class="space-y-2">
+                        <div class="text-sm text-slate-600">• Sidebar navigation should be visible</div>
+                        <div class="text-sm text-slate-600">• Dashboard grid layout active</div>
+                        <div class="text-sm text-slate-600">• No bottom navigation</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">Layout Grid Test</h2>
+            
+            <!-- Mobile Grid -->
+            <div class="lg:hidden mb-4">
+                <h3 class="font-medium mb-2">Mobile Grid (Single Column)</h3>
+                <div class="grid grid-cols-1 gap-3">
+                    <div class="bg-blue-100 p-3 rounded text-center">Item 1</div>
+                    <div class="bg-green-100 p-3 rounded text-center">Item 2</div>
+                    <div class="bg-purple-100 p-3 rounded text-center">Item 3</div>
+                </div>
+            </div>
+            
+            <!-- Desktop Grid -->
+            <div class="hidden lg:block">
+                <h3 class="font-medium mb-2">Desktop Grid (Multi-Column)</h3>
+                <div class="grid lg:grid-cols-3 gap-4">
+                    <div class="bg-blue-100 p-4 rounded text-center">Item 1</div>
+                    <div class="bg-green-100 p-4 rounded text-center">Item 2</div>
+                    <div class="bg-purple-100 p-4 rounded text-center">Item 3</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">Typography & Spacing Test</h2>
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+                <h3 class="text-lg lg:text-xl font-medium mb-2">Responsive Typography</h3>
+                <p class="text-sm lg:text-base text-slate-600 mb-4">
+                    This text should be smaller on mobile and larger on desktop. Spacing should also adapt.
+                </p>
+                <div class="space-y-2 lg:space-y-4">
+                    <div class="p-2 lg:p-4 bg-slate-50 rounded">Responsive padding</div>
+                    <div class="p-2 lg:p-4 bg-slate-50 rounded">Responsive spacing</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center text-sm text-slate-500 mt-8">
+            Resize your browser window to test responsive breakpoints.<br>
+            Mobile-first design with lg breakpoint at 1024px.
+        </div>
+    </div>
+    
+    <!-- Test Bottom Navigation for Mobile -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-30">
+        <div class="flex">
+            <a href="#" class="flex-1 flex flex-col items-center py-2 px-1 text-blue-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                <span class="text-xs mt-1">Test</span>
+            </a>
+        </div>
+    </nav>
+</body>
+</html>

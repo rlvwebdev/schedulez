@@ -1,0 +1,341 @@
+/* Mobile-First Responsive Styles for Schedulez */
+
+/* Mobile Navigation Styles */
+.mobile-nav-link {
+    @apply flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors touch-manipulation;
+}
+
+.mobile-nav-link.active {
+    @apply bg-blue-50 text-blue-700 font-medium;
+}
+
+/* Bottom Navigation Styles */
+.bottom-nav-link {
+    @apply flex flex-col items-center justify-center flex-1 py-2 px-3 text-slate-600 hover:text-blue-600 transition-colors touch-manipulation;
+}
+
+.bottom-nav-link.active {
+    @apply text-blue-600;
+}
+
+/* Desktop Navigation Styles */
+.desktop-nav-link {
+    @apply flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors;
+}
+
+.desktop-nav-link.active {
+    @apply bg-blue-50 text-blue-700 font-medium;
+}
+
+/* Page Visibility */
+.page {
+    @apply block;
+}
+
+.page.hidden {
+    @apply hidden;
+}
+
+.page.active {
+    @apply block;
+}
+
+/* Button Styles */
+.btn {
+    @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors;
+}
+
+.btn-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+}
+
+.btn-secondary {
+    @apply bg-slate-600 text-white hover:bg-slate-700 focus:ring-slate-500;
+}
+
+.btn-outline {
+    @apply border-slate-300 text-slate-700 hover:bg-slate-50 focus:ring-slate-500;
+}
+
+.btn-success {
+    @apply bg-green-600 text-white hover:bg-green-700 focus:ring-green-500;
+}
+
+/* Touch Optimizations */
+.touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Card Styles */
+.card {
+    @apply bg-white rounded-lg shadow-sm border border-slate-200;
+}
+
+.card-header {
+    @apply px-6 py-4 border-b border-slate-200;
+}
+
+.card-body {
+    @apply p-6;
+}
+
+/* Form Styles */
+.form-group {
+    @apply mb-4;
+}
+
+.form-label {
+    @apply block text-sm font-medium text-slate-700 mb-1;
+}
+
+.form-input,
+.form-control {
+    @apply w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors;
+}
+
+.form-select {
+    @apply appearance-none bg-white;
+}
+
+/* Task Item Styles */
+.task-item {
+    @apply flex items-center space-x-3 p-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-colors;
+}
+
+.task-item.completed {
+    @apply bg-green-50 border-green-200;
+}
+
+.task-checkbox {
+    @apply w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-blue-500;
+}
+
+.task-time {
+    @apply text-sm font-medium text-slate-600 min-w-0 flex-shrink-0;
+}
+
+.task-title {
+    @apply flex-1 text-slate-800 font-medium;
+}
+
+.task-title.completed {
+    @apply line-through text-slate-500;
+}
+
+.task-category {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.task-category.personal {
+    @apply bg-blue-100 text-blue-800;
+}
+
+.task-category.dogs {
+    @apply bg-amber-100 text-amber-800;
+}
+
+.task-category.cleaning {
+    @apply bg-green-100 text-green-800;
+}
+
+.task-category.kitchen {
+    @apply bg-orange-100 text-orange-800;
+}
+
+.task-category.development {
+    @apply bg-purple-100 text-purple-800;
+}
+
+.task-category.maintenance {
+    @apply bg-slate-100 text-slate-800;
+}
+
+/* Progress Bar Styles */
+.progress-bar {
+    @apply w-full bg-slate-200 rounded-full h-2 overflow-hidden;
+}
+
+.progress-fill {
+    @apply h-full rounded-full transition-all duration-500 ease-out;
+}
+
+/* Stat Card Styles */
+.stat-card {
+    @apply bg-white rounded-lg shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow;
+}
+
+.stat-icon {
+    @apply w-12 h-12 flex items-center justify-center rounded-lg;
+}
+
+.stat-value {
+    @apply text-3xl font-bold text-slate-900 mt-3;
+}
+
+.stat-label {
+    @apply text-sm font-medium text-slate-600 mt-1;
+}
+
+/* Loading States */
+.loading-spinner {
+    @apply w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto;
+}
+
+.loading-analytics,
+.loading-goals {
+    @apply flex flex-col items-center justify-center py-12 space-y-4;
+}
+
+/* Grid Layouts */
+.tasks-grid {
+    @apply grid gap-6;
+}
+
+@screen sm {
+    .tasks-grid {
+        @apply grid-cols-2;
+    }
+}
+
+@screen lg {
+    .tasks-grid {
+        @apply grid-cols-3;
+    }
+}
+
+/* Navigation Drawer Animation */
+#mobile-nav {
+    transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+#mobile-nav.open {
+    transform: translateX(0);
+}
+
+/* Modal Styles */
+.modal {
+    @apply fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4;
+}
+
+.modal-content {
+    @apply bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto;
+}
+
+.modal-header {
+    @apply flex items-center justify-between p-6 border-b border-slate-200;
+}
+
+.modal-title {
+    @apply text-xl font-bold text-slate-800;
+}
+
+/* Responsive Utilities */
+@screen sm {
+    .grid-stats {
+        @apply grid-cols-2;
+    }
+}
+
+@screen lg {
+    .grid-stats {
+        @apply grid-cols-4;
+    }
+}
+
+/* Hover Effects */
+.hover-lift {
+    @apply transition-transform duration-200 hover:-translate-y-1;
+}
+
+.hover-grow {
+    @apply transition-transform duration-200 hover:scale-105;
+}
+
+/* Focus States */
+.focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+}
+
+/* Dark Mode Support (if needed) */
+@media (prefers-color-scheme: dark) {
+    .dark-mode {
+        @apply bg-slate-900 text-slate-100;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .print-break {
+        page-break-before: always;
+    }
+}
+
+/* Accessibility Improvements */
+.sr-only {
+    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+}
+
+/* Animation Classes */
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Task Completion Animation */
+.task-complete-animation {
+    animation: taskComplete 0.6s ease-out;
+}
+
+@keyframes taskComplete {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Category Color Inheritance */
+.category-personal { @apply border-l-4 border-blue-500; }
+.category-dogs { @apply border-l-4 border-amber-500; }
+.category-cleaning { @apply border-l-4 border-green-500; }
+.category-kitchen { @apply border-l-4 border-orange-500; }
+.category-development { @apply border-l-4 border-purple-500; }
+.category-maintenance { @apply border-l-4 border-slate-500; }
+
+/* Responsive Typography */
+.text-responsive {
+    @apply text-sm sm:text-base lg:text-lg;
+}
+
+/* Safe Area Insets for Mobile */
+@supports (padding-top: env(safe-area-inset-top)) {
+    .safe-top {
+        padding-top: env(safe-area-inset-top);
+    }
+    
+    .safe-bottom {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}

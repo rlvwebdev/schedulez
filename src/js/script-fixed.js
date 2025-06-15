@@ -8,9 +8,6 @@ let isInitialized = false;
 let renderQueued = false;
 let deferredPrompt = null;
 
-// Theme Management System
-let currentTheme = 'auto'; // Default to auto
-
 // Utility Functions
 function isLocalStorageAvailable() {
   try {
@@ -326,28 +323,17 @@ function renderMobileContent(pageId) {
       renderTodaySchedule();
       updateDashboard();
       break;
-    case 'daily':
     case 'daily-schedule':
-      renderDailySchedule('mobile-daily-schedule');
+      renderDailySchedule();
       break;
-    case 'weekly':
     case 'weekly-tasks':
-      renderWeeklyTasks('mobile-weekly-tasks');
+      renderWeeklyTasks();
       break;
-    case 'monthly':
     case 'monthly-tasks':
-      renderMonthlyTasks('mobile-monthly-tasks');
+      renderMonthlyTasks();
       break;
-    case 'manage':
     case 'manage-events':
-      // Mobile manage page is already a static settings page
-      renderSettings('mobile');
-      break;
-    case 'analytics':
-      renderAnalytics('mobile-analytics-content');
-      break;
-    case 'yearly-goals':
-      renderYearlyGoals('mobile-yearly-goals-content');
+      renderManageEvents();
       break;
     default:
       break;
@@ -360,27 +346,17 @@ function renderDesktopContent(pageId) {
       renderTodaySchedule();
       updateDashboard();
       break;
-    case 'daily':
     case 'daily-schedule':
-      renderDailySchedule('daily-schedule');
+      renderDailySchedule();
       break;
-    case 'weekly':
     case 'weekly-tasks':
-      renderWeeklyTasks('weekly-tasks');
+      renderWeeklyTasks();
       break;
-    case 'monthly':
     case 'monthly-tasks':
-      renderMonthlyTasks('monthly-tasks');
+      renderMonthlyTasks();
       break;
-    case 'manage':
     case 'manage-events':
-      renderSettings('desktop');
-      break;
-    case 'analytics':
-      renderAnalytics('desktop-analytics-content');
-      break;
-    case 'yearly-goals':
-      renderYearlyGoals('desktop-yearly-goals-content');
+      renderManageEvents();
       break;
     default:
       break;
@@ -394,95 +370,33 @@ function updatePageMetadata(pageId, viewMode) {
 
 // Mobile Navigation Functions
 function toggleMobileNav() {
-  const sidebar = document.getElementById('mobile-nav');
+  const sidebar = document.querySelector('.sidebar');
   const toggleBtn = document.getElementById('mobile-nav-toggle');
   const backdrop = document.getElementById('mobile-nav-backdrop');
-  const isOpen = sidebar.classList.contains('translate-x-0');
+  const isOpen = sidebar.classList.contains('nav-mobile-open');
   
   if (isOpen) {
-    sidebar.classList.remove('translate-x-0');
-    sidebar.classList.add('-translate-x-full');
-    backdrop.classList.add('hidden');
+    sidebar.classList.remove('nav-mobile-open');
+    backdrop.classList.remove('show');
     toggleBtn.setAttribute('aria-expanded', 'false');
     document.body.style.overflow = '';
   } else {
-    sidebar.classList.remove('-translate-x-full');
-    sidebar.classList.add('translate-x-0');
-    backdrop.classList.remove('hidden');
+    sidebar.classList.add('nav-mobile-open');
+    backdrop.classList.add('show');
     toggleBtn.setAttribute('aria-expanded', 'true');
     document.body.style.overflow = 'hidden';
   }
 }
 
 function closeMobileDrawer() {
-  const sidebar = document.getElementById('mobile-nav');
+  const sidebar = document.querySelector('.sidebar');
   const toggleBtn = document.getElementById('mobile-nav-toggle');
   const backdrop = document.getElementById('mobile-nav-backdrop');
   
-  if (sidebar) {
-    sidebar.classList.remove('translate-x-0');
-    sidebar.classList.add('-translate-x-full');
-  }
-  if (backdrop) {
-    backdrop.classList.add('hidden');
-  }
-  if (toggleBtn) {
-    toggleBtn.setAttribute('aria-expanded', 'false');
-  }
+  sidebar.classList.remove('nav-mobile-open');
+  backdrop.classList.remove('show');
+  toggleBtn.setAttribute('aria-expanded', 'false');
   document.body.style.overflow = '';
-}
-
-// Enhanced Mobile Menu Functionality
-function toggleMobileMenu() {
-  const mobileNav = document.getElementById('mobile-nav');
-  const backdrop = document.getElementById('mobile-nav-backdrop');
-  
-  if (mobileNav && backdrop) {
-    const isOpen = !mobileNav.classList.contains('-translate-x-full');
-    
-    if (isOpen) {
-      closeMobileMenu();
-    } else {
-      openMobileMenu();
-    }
-  }
-}
-
-function openMobileMenu() {
-  const mobileNav = document.getElementById('mobile-nav');
-  const backdrop = document.getElementById('mobile-nav-backdrop');
-  
-  if (mobileNav && backdrop) {
-    backdrop.classList.remove('hidden');
-    mobileNav.classList.remove('-translate-x-full');
-    
-    // Add animation classes
-    backdrop.style.opacity = '0';
-    mobileNav.style.transform = 'translateX(-100%)';
-    
-    requestAnimationFrame(() => {
-      backdrop.style.transition = 'opacity 0.3s ease';
-      backdrop.style.opacity = '1';
-      
-      mobileNav.style.transition = 'transform 0.3s ease';
-      mobileNav.style.transform = 'translateX(0)';
-    });
-  }
-}
-
-function closeMobileMenu() {
-  const mobileNav = document.getElementById('mobile-nav');
-  const backdrop = document.getElementById('mobile-nav-backdrop');
-  
-  if (mobileNav && backdrop) {
-    backdrop.style.opacity = '0';
-    mobileNav.style.transform = 'translateX(-100%)';
-    
-    setTimeout(() => {
-      backdrop.classList.add('hidden');
-      mobileNav.classList.add('-translate-x-full');
-    }, 300);
-  }
 }
 
 // Event Management Functions
@@ -651,59 +565,8 @@ function clearEventForm() {
   updateDayWeekFields();
   
   // Reset form title and button text
-  const modalTitle = document.getElementById('modal-title');
-  if (modalTitle) {
-    modalTitle.textContent = 'Add New Event';
-  }
-}
-
-// Handle event form submission
-function handleEventFormSubmit(event) {
-  event.preventDefault();
-  
-  const form = event.target;
-  const formData = new FormData(form);
-  
-  const eventData = {
-    title: formData.get('title').trim(),
-    time: formData.get('time'),
-    category: formData.get('category',
-    schedule: formData.get('schedule'),
-    day: formData.get('day') || '',
-    week: formData.get('week') || '',
-    description: formData.get('description').trim(),
-    completed: false,
-    completedToday: false,
-    lastCompleted: null
-  };
-  
-  // Validation
-  if (!eventData.title || !eventData.time || !eventData.category || !eventData.schedule) {
-    showNotification('Please fill in all required fields.', 'error');
-    return;
-  }
-  
-  if (editingEventId) {
-    // Update existing event
-    const index = events.findIndex(e => e.id === editingEventId);
-    if (index !== -1) {
-      // Preserve completion status when editing
-      eventData.completed = events[index].completed;
-      eventData.completedToday = events[index].completedToday;
-      eventData.lastCompleted = events[index].lastCompleted;
-      eventData.id = editingEventId;
-      events[index] = eventData;
-      showNotification('Event updated successfully!', 'success');
-    }
-  } else {
-    // Add new event
-    eventData.id = generateUniqueId();
-    events.push(eventData);
-    showNotification('Event added successfully!', 'success');
-  }
-  
-  saveEvents();
-  closeEventModal();
+  document.querySelector('#add-event h3').textContent = 'Add New Event';
+  document.querySelector('#event-form button[type="submit"]').textContent = 'Add Event';
 }
 
 // Task Management Functions
@@ -770,68 +633,6 @@ function refreshCurrentView() {
   }
 }
 
-// Dashboard Functions
-function updateDashboard() {
-  // Update total tasks count
-  const totalTasksElement = document.getElementById('total-tasks');
-  if (totalTasksElement) {
-    totalTasksElement.textContent = events.length;
-  }
-
-  // Update dashboard stats
-  updateDashboardStats();
-
-  // Update today's schedule overview
-  renderTodaySchedule();
-
-  // Update progress statistics
-  updateProgressStats();
-}
-
-function updateDashboardStats() {
-  const dailyTasks = events.filter(e => e.schedule === 'daily');
-  const weeklyTasks = events.filter(e => e.schedule === 'weekly');
-  const monthlyTasks = events.filter(e => e.schedule === 'monthly');
-  
-  const dailyCompleted = dailyTasks.filter(e => e.completedToday).length;
-  const weeklyCompleted = weeklyTasks.filter(e => e.completed).length;
-  const monthlyCompleted = monthlyTasks.filter(e => e.completed).length;
-  
-  // Update mobile stats
-  const mobileDailyCompletedElement = document.getElementById('mobile-daily-completed');
-  const mobileWeeklyCompletedElement = document.getElementById('mobile-weekly-completed');
-  const mobileMonthlyCompletedElement = document.getElementById('mobile-monthly-completed');
-  
-  if (mobileDailyCompletedElement) {
-    mobileDailyCompletedElement.textContent = dailyCompleted;
-  }
-  if (mobileWeeklyCompletedElement) {
-    mobileWeeklyCompletedElement.textContent = weeklyCompleted;
-  }
-  if (mobileMonthlyCompletedElement) {
-    mobileMonthlyCompletedElement.textContent = monthlyCompleted;
-  }
-  
-  // Update desktop stats
-  const totalEventsElement = document.getElementById('total-events');
-  const dailyCompletedElement = document.getElementById('daily-completed-count');
-  const weeklyCompletedElement = document.getElementById('weekly-completed-count');
-  const monthlyCompletedElement = document.getElementById('monthly-completed-count');
-  
-  if (totalEventsElement) {
-    totalEventsElement.textContent = events.length;
-  }
-  if (dailyCompletedElement) {
-    dailyCompletedElement.textContent = `${dailyCompleted}/${dailyTasks.length}`;
-  }
-  if (weeklyCompletedElement) {
-    weeklyCompletedElement.textContent = `${weeklyCompleted}/${weeklyTasks.length}`;
-  }
-  if (monthlyCompletedElement) {
-    monthlyCompletedElement.textContent = `${monthlyCompleted}/${monthlyTasks.length}`;
-  }
-}
-
 // Progress and Statistics Functions
 function updateProgressStats() {
   const dailyTasks = events.filter(e => e.schedule === 'daily');
@@ -863,40 +664,6 @@ function updateProgressBar(id, completed, total) {
     const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
     progressFill.style.width = `${percentage}%`;
     progressText.textContent = `${completed}/${total} (${percentage}%)`;
-    
-    // Add completion classes for styling
-    const progressBar = progressFill.closest('.progress-bar');
-    if (progressBar) {
-      progressBar.classList.toggle('progress-complete', percentage === 100);
-      progressBar.classList.toggle('progress-high', percentage >= 80 && percentage < 100);
-    }
-  }
-}
-
-// Update progress bar width using data-width attribute
-function updateProgressBarWidth(element, percentage) {
-  if (element) {
-    element.setAttribute('data-width', percentage.toString());
-    // Also update CSS custom property for browsers that support it
-    element.style.setProperty('--progress-width', percentage + '%');
-    // Fallback for older browsers
-    element.style.width = percentage + '%';
-  }
-}
-
-// Enhanced progress bar update function
-function updateProgressBarDataWidth(id, completed, total) {
-  const progressFill = document.getElementById(`${id}-bar`);
-  const progressText = document.getElementById(`${id}-text`) || document.getElementById(`${id}`);
-  
-  if (progressFill) {
-    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-    updateProgressBarWidth(progressFill, percentage);
-    
-    // Update text if element exists
-    if (progressText) {
-      progressText.textContent = `${completed}/${total} (${percentage}%)`;
-    }
     
     // Add completion classes for styling
     const progressBar = progressFill.closest('.progress-bar');
@@ -996,23 +763,10 @@ function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function renderDailySchedule(containerId = 'daily-schedule') {
+function renderDailySchedule() {
   const dailyEvents = events.filter(e => e.schedule === 'daily').sort((a, b) => a.time.localeCompare(b.time));
-  const container = document.getElementById(containerId);
+  const container = document.getElementById('daily-schedule');
   if (!container) {
-    return;
-  }
-  
-  if (dailyEvents.length === 0) {
-    container.innerHTML = `
-      <div class="text-center py-8 text-slate-500">
-        <h3 class="text-lg font-medium mb-2">No daily tasks yet</h3>
-        <p class="mb-4">Create your first daily task to get started!</p>
-        <button onclick="openEventModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-          Add Daily Task
-        </button>
-      </div>
-    `;
     return;
   }
   
@@ -1042,24 +796,10 @@ function renderDailySchedule(containerId = 'daily-schedule') {
   `).join('');
 }
 
-function renderWeeklyTasks(containerId = 'weekly-tasks') {
+function renderWeeklyTasks() {
   const weekDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-  const container = document.getElementById(containerId);
+  const container = document.getElementById('weekly-tasks');
   if (!container) {
-    return;
-  }
-  
-  const weeklyEvents = events.filter(e => e.schedule === 'weekly');
-  if (weeklyEvents.length === 0) {
-    container.innerHTML = `
-      <div class="text-center py-8 text-slate-500">
-        <h3 class="text-lg font-medium mb-2">No weekly tasks yet</h3>
-        <p class="mb-4">Create weekly tasks to organize your schedule!</p>
-        <button onclick="openEventModal()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
-          Add Weekly Task
-        </button>
-      </div>
-    `;
     return;
   }
   
@@ -1099,24 +839,10 @@ function renderWeeklyTasks(containerId = 'weekly-tasks') {
   }).join('');
 }
 
-function renderMonthlyTasks(containerId = 'monthly-tasks') {
+function renderMonthlyTasks() {
   const weeks = ['first', 'second', 'third', 'fourth'];
-  const container = document.getElementById(containerId);
+  const container = document.getElementById('monthly-tasks');
   if (!container) {
-    return;
-  }
-  
-  const monthlyEvents = events.filter(e => e.schedule === 'monthly');
-  if (monthlyEvents.length === 0) {
-    container.innerHTML = `
-      <div class="text-center py-8 text-slate-500">
-        <h3 class="text-lg font-medium mb-2">No monthly tasks yet</h3>
-        <p class="mb-4">Create monthly tasks for long-term planning!</p>
-        <button onclick="openEventModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg">
-          Add Monthly Task
-        </button>
-      </div>
-    `;
     return;
   }
   
@@ -1189,137 +915,42 @@ function renderTodaySchedule() {
     totalTasksElement.textContent = events.length;
   }
   
-  // Update dashboard stats
-  updateDashboardStats();
-
   // Update today's schedule overview
   renderTodaySchedule();
-
+  
   // Update progress statistics
   updateProgressStats();
 }
 
-// Render Analytics page
-function renderAnalytics(containerId = null) {
-  const container = containerId ? 
-    document.getElementById(containerId) : 
-    (document.getElementById('mobile-analytics-content') || document.getElementById('desktop-analytics-content'));
-  if (!container) {
-    return;
-  }
-  
-  const dailyTasks = events.filter(e => e.schedule === 'daily');
-  const weeklyTasks = events.filter(e => e.schedule === 'weekly');
-  const monthlyTasks = events.filter(e => e.schedule === 'monthly');
-  
-  const dailyCompleted = dailyTasks.filter(e => e.completedToday).length;
-  const weeklyCompleted = weeklyTasks.filter(e => e.completed).length;
-  const monthlyCompleted = monthlyTasks.filter(e => e.completed).length;
-  
-  container.innerHTML = `
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-        <h3 class="text-lg font-semibold text-slate-800 mb-4">Task Completion</h3>
-        <div class="space-y-4">
-          <div>
-            <div class="flex justify-between text-sm mb-1">
-              <span>Daily Tasks</span>
-              <span>${dailyCompleted}/${dailyTasks.length}</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" style="width: ${dailyTasks.length > 0 ? (dailyCompleted / dailyTasks.length) * 100 : 0}%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between text-sm mb-1">
-              <span>Weekly Tasks</span>
-              <span>${weeklyCompleted}/${weeklyTasks.length}</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" style="width: ${weeklyTasks.length > 0 ? (weeklyCompleted / weeklyTasks.length) * 100 : 0}%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between text-sm mb-1">
-              <span>Monthly Tasks</span>
-              <span>${monthlyCompleted}/${monthlyTasks.length}</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" style="width: ${monthlyTasks.length > 0 ? (monthlyCompleted / monthlyTasks.length) * 100 : 0}%"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-        <h3 class="text-lg font-semibold text-slate-800 mb-4">Task Distribution</h3>
-        <div class="space-y-3">
-          <div class="flex justify-between">
-            <span class="text-slate-600">Daily Tasks</span>
-            <span class="font-medium text-slate-800">${dailyTasks.length}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-slate-600">Weekly Tasks</span>
-            <span class="font-medium text-slate-800">${weeklyTasks.length}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-slate-600">Monthly Tasks</span>
-            <span class="font-medium text-slate-800">${monthlyTasks.length}</span>
-          </div>
-          <hr class="border-slate-200">
-          <div class="flex justify-between font-semibold">
-            <span class="text-slate-800">Total Tasks</span>
-            <span class="text-slate-800">${events.length}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// Render Yearly Goals page
-function renderYearlyGoals(containerId = null) {
-  const container = containerId ? 
-    document.getElementById(containerId) : 
-    (document.getElementById('mobile-yearly-goals-content') || document.getElementById('desktop-yearly-goals-content'));
-  if (!container) {
-    return;
-  }
-  
-  container.innerHTML = `
-    <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-      <h3 class="text-lg font-semibold text-slate-800 mb-4">Yearly Goals</h3>
-      <div class="text-center text-slate-500 py-8">
-        <svg class="w-16 h-16 mx-auto mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <p class="text-lg mb-2">Set Your Yearly Goals</p>
-        <p class="text-sm">Define long-term objectives and track your progress throughout the year.</p>
-        <button class="mt-4 btn btn-primary" onclick="showNotification('Goals feature coming soon!', 'info')">
-          Add Goal
-        </button>
-      </div>
-    </div>
-  `;
-}
-
-// Event Management Functions
-function renderManageEvents(containerId = 'events-list') {
-  const container = document.getElementById(containerId);
+function updateDashboard() {
+  const container = document.getElementById('events-list');
   if (!container) {
     return;
   }
   
   if (events.length === 0) {
-    container.innerHTML = `
-      <div class="text-center py-8 text-slate-500">
-        <h3 class="text-lg font-medium mb-2">No events yet</h3>
-        <p class="mb-4">Create your first event to get started!</p>
-        <button onclick="openEventModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-          Add Event
-        </button>
-      </div>
-    `;
+    container.innerHTML = '<div class="no-events" role="status" aria-live="polite">No events configured. Start by adding your first event!</div>';
+    return;
+  }
+  
+  // Update total tasks count
+  const totalTasksElement = document.getElementById('total-tasks');
+  if (totalTasksElement) {
+    totalTasksElement.textContent = events.length;
+  }
+  
+  // Update progress statistics
+  updateProgressStats();
+}
+
+function renderManageEvents() {
+  const container = document.getElementById('events-list');
+  if (!container) {
+    return;
+  }
+  
+  if (events.length === 0) {
+    container.innerHTML = '<div class="no-events" role="status" aria-live="polite">No events configured. Start by adding your first event!</div>';
     return;
   }
   
@@ -1332,166 +963,45 @@ function renderManageEvents(containerId = 'events-list') {
     return a.time.localeCompare(b.time);
   });
   
-  container.innerHTML = sortedEvents.map(event => {
+  // Set ARIA attributes for the container
+  container.setAttribute('role', 'list');
+  container.setAttribute('aria-label', `Event management list with ${sortedEvents.length} events`);
+  
+  container.innerHTML = sortedEvents.map((event, index) => {
     const isCompleted = event.schedule === 'daily' ? event.completedToday : event.completed;
-    
     return `
-      <div class="event-item ${isCompleted ? 'completed' : ''}" data-id="${event.id}">
-        <div class="event-checkbox-container">
-          <input type="checkbox" 
-                 class="event-checkbox" 
-                 ${isCompleted ? 'checked' : ''} 
-                 onchange="toggleTaskCompletion(${event.id})">
-        </div>
+      <div class="event-item" data-id="${event.id}" role="listitem" aria-label="Event ${index + 1} of ${sortedEvents.length}">
         <div class="event-content">
-          <div class="event-header">
-            <h4 class="event-title">${escapeHTML(event.title)}</h4>
-            <div class="event-meta">
-              <span class="event-time">${escapeHTML(event.time)}</span>
-              <span class="event-category category-${escapeHTML(event.category)}">${escapeHTML(event.category)}</span>
-              <span class="event-schedule">${escapeHTML(event.schedule)}</span>
-              ${event.day ? `<span class="event-day">${escapeHTML(event.day)}</span>` : ''}
-              ${event.week ? `<span class="event-week">${escapeHTML(event.week)}</span>` : ''}
-            </div>
+          <div class="event-time">${formatTime12Hour(event.time)}</div>
+          <div class="event-title">${escapeHTML(event.title)}</div>
+          <div class="event-meta">
+            <span class="event-category">${capitalize(event.category)}</span>
+            <span class="event-schedule">${capitalize(event.schedule)}</span>
+            ${event.day ? `<span class="event-day">${capitalize(event.day)}</span>` : ''}
+            ${event.week ? `<span class="event-week">${capitalize(event.week)} Week</span>` : ''}
           </div>
-          ${event.description ? `<p class="event-description">${escapeHTML(event.description)}</p>` : ''}
+          ${event.description ? `<div class="event-description">${escapeHTML(event.description)}</div>` : ''}
         </div>
         <div class="event-actions">
-          <button onclick="editEvent(${event.id})" class="btn-edit" title="Edit event">✏️</button>
-          <button onclick="deleteEvent(${event.id})" class="btn-delete" title="Delete event">🗑️</button>
+          <button class="btn-complete ${isCompleted ? 'completed' : ''}" 
+                  onclick="toggleTaskCompletion(${event.id})"
+                  title="${isCompleted ? 'Mark as incomplete' : 'Mark as complete'}"
+                  aria-label="${isCompleted ? 'Mark task as incomplete' : 'Mark task as complete'}">
+            ${isCompleted ? '✓' : '○'}
+          </button>
+          <div class="event-card-dropdown">
+            <button class="dropdown-toggle" onclick="toggleDropdown(this.parentElement)" aria-label="More options">⋯</button>
+            <div class="dropdown-menu">
+              <button onclick="editEvent(${event.id})">Edit</button>
+              <button onclick="deleteEvent(${event.id})">Delete</button>
+            </div>
+          </div>
         </div>
       </div>
     `;
   }).join('');
-}
-
-// Modal Functions
-function openEventModal(eventId = null) {
-  const modal = document.getElementById('event-modal');
-  const backdrop = document.getElementById('modal-backdrop');
   
-  if (modal && backdrop) {
-    editingEventId = eventId;
-    
-    if (eventId) {
-      populateEventForm(eventId);
-      document.getElementById('modal-title').textContent = 'Edit Event';
-    } else {
-      clearEventForm();
-      document.getElementById('modal-title').textContent = 'Add New Event';
-    }
-    
-    // Show modal with animation
-    backdrop.classList.remove('hidden');
-    backdrop.style.opacity = '0';
-    modal.style.opacity = '0';
-    modal.style.transform = 'translateY(-20px) scale(0.95)';
-    
-    requestAnimationFrame(() => {
-      backdrop.style.transition = 'opacity 0.3s ease';
-      backdrop.style.opacity = '1';
-      
-      modal.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-      modal.style.opacity = '1';
-      modal.style.transform = 'translateY(0) scale(1)';
-    });
-  }
-}
-
-function closeEventModal() {
-  const modal = document.getElementById('event-modal');
-  const backdrop = document.getElementById('modal-backdrop');
-  
-  if (modal && backdrop) {
-    backdrop.style.opacity = '0';
-    modal.style.opacity = '0';
-    modal.style.transform = 'translateY(-20px) scale(0.95)';
-    
-    setTimeout(() => {
-      backdrop.classList.add('hidden');
-      editingEventId = null;
-    }, 300);
-  }
-}
-
-// Add task modal functions for the additional modal
-function openAddTaskModal() {
-  const modal = document.getElementById('add-task-modal');
-  if (modal) {
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    
-    // Focus first input
-    setTimeout(() => {
-      const firstInput = modal.querySelector('input[type="text"]');
-      if (firstInput) firstInput.focus();
-    }, 100);
-  }
-}
-
-function closeAddTaskModal() {
-  const modal = document.getElementById('add-task-modal');
-  if (modal) {
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-    
-    // Reset form
-    const form = modal.querySelector('form');
-    if (form) form.reset();
-  }
-}
-
-// Data Export/Import Functions
-function exportData() {
-  const data = {
-    events: events,
-    exportDate: new Date().toISOString(),
-    version: '1.0'
-  };
-  
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `schedulez-backup-${new Date().toISOString().split('T')[0]}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  
-  showNotification('Data exported successfully', 'success');
-}
-
-function importData(input) {
-  const file = input.files[0];
-  if (!file) return;
-  
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (data.events && Array.isArray(data.events)) {
-        events = data.events.filter(event => event.id && event.title);
-        saveEventsToStorage();
-        loadDashboardContent();
-        showNotification(`Imported ${events.length} events`, 'success');
-      } else {
-        showNotification('Invalid file format', 'error');
-      }
-    } catch (error) {
-      showNotification('Error reading file', 'error');
-    }
-  };
-  reader.readAsText(file);
-  input.value = '';
-}
-
-function toggleNotifications(type, enabled) {
-  const settings = JSON.parse(localStorage.getItem('schedulez-notifications') || '{}');
-  settings[type] = enabled;
-  localStorage.setItem('schedulez-notifications', JSON.stringify(settings));
-  showNotification(`${type} notifications ${enabled ? 'enabled' : 'disabled'}`, 'info');
+  container.dataset.schedule = 'manage';
 }
 
 // Event Handlers
@@ -1582,88 +1092,6 @@ function showNotification(message, type) {
   }, 5000);
 }
 
-// Theme Management Functions
-function initializeTheme() {
-  // Load saved theme preference
-  const savedTheme = localStorage.getItem('schedulez-theme') || 'auto';
-  setTheme(savedTheme);
-  
-  // Add event listeners for theme toggle buttons
-  document.querySelectorAll('.theme-toggle').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const theme = this.getAttribute('data-theme');
-      setTheme(theme);
-    });
-  });
-}
-
-function setTheme(theme) {
-  currentTheme = theme;
-  localStorage.setItem('schedulez-theme', theme);
-  
-  // Update theme toggle buttons
-  document.querySelectorAll('.theme-toggle').forEach(btn => {
-    btn.classList.remove('active');
-    if (btn.getAttribute('data-theme') === theme) {
-      btn.classList.add('active');
-    }
-  });
-  
-  // Apply theme to document
-  if (theme === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-  } else if (theme === 'light') {
-    document.documentElement.setAttribute('data-theme', 'light');
-  } else {
-    // Auto theme - remove attribute to use CSS media query
-    document.documentElement.removeAttribute('data-theme');
-  }
-  
-  // Trigger theme change event for any components that need to update
-  window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme } }));
-  
-  showNotification(`Theme changed to ${theme}`, 'success');
-}
-
-function getEffectiveTheme() {
-  if (currentTheme === 'auto') {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-  return currentTheme;
-}
-
-// Settings Management Functions
-function resetDailyTasks() {
-  if (confirm('Reset all daily tasks as incomplete?')) {
-    events.forEach(event => {
-      if (event.schedule === 'daily') {
-        event.completedToday = false;
-      }
-    });
-    saveEvents();
-    updateDashboardStats();
-    showNotification('Daily tasks reset', 'success');
-  }
-}
-
-function confirmClearAllData() {
-  const confirmation = prompt('Type "DELETE" to clear all data:');
-  if (confirmation === 'DELETE') {    events = [];
-    localStorage.clear();
-    initializeDefaultEvents();
-    loadDashboardContent();
-    showNotification('All data cleared', 'success');
-  }
-}
-
-// Make functions globally available
-window.setTheme = setTheme;
-window.resetDailyTasks = resetDailyTasks;
-window.confirmClearAllData = confirmClearAllData;
-window.exportData = exportData;
-window.importData = importData;
-window.toggleNotifications = toggleNotifications;
-
 // Initialization Functions
 function initializeEventForm() {
   const scheduleSelect = document.getElementById('event-schedule');
@@ -1728,7 +1156,7 @@ function initializeNavigation() {
 
 function initializeMobileNavigation() {
   const mobileToggle = document.getElementById('mobile-nav-toggle');
-  const sidebar = document.getElementById('mobile-nav');
+  const sidebar = document.querySelector('.sidebar');
   const backdrop = document.getElementById('mobile-nav-backdrop');
   
   if (mobileToggle) {
@@ -1744,7 +1172,7 @@ function initializeMobileNavigation() {
   document.addEventListener('click', function(e) {
     const toggleBtn = document.getElementById('mobile-nav-toggle');
     if (sidebar && toggleBtn &&
-        sidebar.classList.contains('translate-x-0') && 
+        sidebar.classList.contains('nav-mobile-open') && 
         !sidebar.contains(e.target) && 
         !toggleBtn.contains(e.target)) {
       closeMobileDrawer();
@@ -1753,24 +1181,17 @@ function initializeMobileNavigation() {
   
   // Handle escape key
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && sidebar && sidebar.classList.contains('translate-x-0')) {
+    if (e.key === 'Escape' && sidebar.classList.contains('nav-mobile-open')) {
       closeMobileDrawer();
     }
   });
   
   // Handle resize events - close mobile nav if screen becomes large
   window.addEventListener('resize', function() {
-    if (window.innerWidth >= 1024 && sidebar && sidebar.classList.contains('translate-x-0')) {
+    if (window.innerWidth >= 768 && sidebar.classList.contains('nav-mobile-open')) {
       closeMobileDrawer();
     }
   });
-}
-
-// Utility Functions
-function ensureDashboardVisible() {
-  // Ensure dashboard is visible on initial load
-  const currentViewMode = getCurrentViewMode();
-  navigateToPage('dashboard', currentViewMode);
 }
 
 // Main initialization function
@@ -1816,44 +1237,22 @@ function initializeWithErrorHandling(name, initFunction) {
   });
 }
 
-// Dashboard Content Loading
-function loadDashboardContent() {
-  try {
-    updateDashboard();
-    renderTodaySchedule();
-    updateProgressStats();
-  } catch (error) {
-    showNotification('Dashboard loading failed: ' + error.message, 'error');
-  }
-}
-
-// Main DOM Content Loaded Event
+// DOM ready event
 document.addEventListener('DOMContentLoaded', function() {
   try {
-    // Initialize app data first
     initializeAppData();
-    
-    // Initialize theme system
-    initializeTheme();
-    
-    // Initialize the main app
     initializeApp();
-    
-    // Initialize navigation event listeners
-    initializeNavigation();
-    
-    // Initialize mobile navigation
-    initializeMobileNavigation();
-    
-    // Load dashboard content
-    loadDashboardContent();
-    
-    // Ensure dashboard is visible by default
-    ensureDashboardVisible();
-    
-    showNotification('✅ Schedulez loaded successfully!', 'success');
   } catch (error) {
     showNotification('Critical initialization error. Please refresh the page.', 'error');
   }
 });
 
+// Global helper functions for debugging
+window.schedulezDebug = {
+  events: () => events,
+  resetDaily: () => resetDailyTasks(),
+  updateStats: () => updateProgressStats(),
+  exportEvents: () => JSON.stringify(events, null, 2)
+};
+
+console.log('✅ Schedulez loaded successfully!');

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedulez - Navigation Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .pass { background-color: #d4edda; color: #155724; }
+        .fail { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>Schedulez Navigation Test</h1>
+    <div id="test-results"></div>
+    
+    <script>
+        const results = [];
+        
+        function addResult(test, passed, message) {
+            results.push({ test, passed, message });
+            displayResults();
+        }
+        
+        function displayResults() {
+            const container = document.getElementById('test-results');
+            container.innerHTML = results.map(result => 
+                `<div class="test-result ${result.passed ? 'pass' : 'fail'}">
+                    <strong>${result.test}:</strong> ${result.message}
+                </div>`
+            ).join('');
+        }
+        
+        // Test if main page is accessible
+        fetch('/')
+            .then(response => {
+                addResult('Main Page', response.ok, response.ok ? 'Main page loads successfully' : 'Main page failed to load');
+                return response.text();
+            })
+            .then(html => {
+                // Test for key elements
+                const hasNavToggle = html.includes('mobile-nav-toggle');
+                const hasScriptTag = html.includes('src/js/script.js');
+                const hasThemeSystem = html.includes('data-theme');
+                
+                addResult('Mobile Nav Toggle', hasNavToggle, hasNavToggle ? 'Mobile nav toggle found' : 'Mobile nav toggle missing');
+                addResult('Script Loading', hasScriptTag, hasScriptTag ? 'Main script included' : 'Main script missing');
+                addResult('Theme System', hasThemeSystem, hasThemeSystem ? 'Theme system implemented' : 'Theme system missing');
+            })
+            .catch(error => {
+                addResult('Connection', false, 'Failed to connect to server: ' + error.message);
+            });
+        
+        // Test CSS file
+        fetch('/src/css/styles.css')
+            .then(response => {
+                addResult('CSS File', response.ok, response.ok ? 'CSS file loads successfully' : 'CSS file failed to load');
+            })
+            .catch(error => {
+                addResult('CSS File', false, 'CSS file error: ' + error.message);
+            });
+            
+        // Test JS file
+        fetch('/src/js/script.js')
+            .then(response => {
+                addResult('JS File', response.ok, response.ok ? 'JavaScript file loads successfully' : 'JavaScript file failed to load');
+                return response.text();
+            })
+            .then(js => {
+                const hasNavFunctions = js.includes('toggleMobileNav') && js.includes('renderMobileContent');
+                const hasThemeFunctions = js.includes('setTheme') && js.includes('initializeTheme');
+                const hasRenderFunctions = js.includes('renderDailySchedule') && js.includes('renderAnalytics');
+                
+                addResult('Navigation Functions', hasNavFunctions, hasNavFunctions ? 'Navigation functions found' : 'Navigation functions missing');
+                addResult('Theme Functions', hasThemeFunctions, hasThemeFunctions ? 'Theme functions found' : 'Theme functions missing');
+                addResult('Render Functions', hasRenderFunctions, hasRenderFunctions ? 'Render functions found' : 'Render functions missing');
+            })
+            .catch(error => {
+                addResult('JS File', false, 'JavaScript file error: ' + error.message);
+            });
+    </script>
+</body>
+</html>

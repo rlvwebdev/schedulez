@@ -667,7 +667,7 @@ function handleEventFormSubmit(event) {
   const eventData = {
     title: formData.get('title').trim(),
     time: formData.get('time'),
-    category: formData.get('category',
+    category: formData.get('category'),
     schedule: formData.get('schedule'),
     day: formData.get('day') || '',
     week: formData.get('week') || '',

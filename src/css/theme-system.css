@@ -612,6 +612,15 @@ body {
 }
 
 /* Modal styling */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background-color: var(--bg-overlay);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
 .modal-enhanced {
   position: fixed;
   inset: 0;
@@ -619,9 +628,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--bg-overlay);
-  padding: 1rem;  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
+  padding: 1rem;
 }
 
 .modal-content-enhanced {

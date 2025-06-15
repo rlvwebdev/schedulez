@@ -1766,6 +1766,34 @@ function initializeMobileNavigation() {
   });
 }
 
+function initializeModals() {
+  // Ensure all modals start hidden
+  const modal = document.getElementById('event-modal');
+  const backdrop = document.getElementById('modal-backdrop');
+  
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.style.opacity = '0';
+    modal.style.transform = 'translateY(-20px) scale(0.95)';
+  }
+  
+  if (backdrop) {
+    backdrop.classList.add('hidden');
+    backdrop.style.opacity = '0';
+  }
+  
+  // Add event listeners for modal close on backdrop click
+  if (backdrop) {
+    backdrop.addEventListener('click', closeEventModal);
+  }
+  
+  // Add event listeners for form submission
+  const eventForm = document.getElementById('event-form');
+  if (eventForm) {
+    eventForm.addEventListener('submit', handleEventFormSubmit);
+  }
+}
+
 // Utility Functions
 function ensureDashboardVisible() {
   // Ensure dashboard is visible on initial load
@@ -1845,6 +1873,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize mobile navigation
     initializeMobileNavigation();
     
+    // Initialize modal system
+    initializeModals();
+    
     // Load dashboard content
     loadDashboardContent();
     
@@ -1856,4 +1887,23 @@ document.addEventListener('DOMContentLoaded', function() {
     showNotification('Critical initialization error. Please refresh the page.', 'error');
   }
 });
+
+function populateEventForm(eventId) {
+  const event = events.find(e => e.id === eventId);
+  if (!event) {
+    return;
+  }
+  
+  document.getElementById('event-title').value = event.title;
+  document.getElementById('event-time').value = event.time;
+  document.getElementById('event-category').value = event.category;
+  document.getElementById('event-schedule').value = event.schedule;
+  document.getElementById('event-day').value = event.day || '';
+  document.getElementById('event-week').value = event.week || '';
+  document.getElementById('event-description').value = event.description || '';
+  
+  updateDayWeekFields();
+}
+
+// Modal Functions
 
